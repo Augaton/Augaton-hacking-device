@@ -7,7 +7,7 @@ local exceptionButtonID = exceptionButtonID or
 	-- [1783] = true,
 }
 
-newGuthSCPH = newGuthSCPH or {} 
+hdevicereloaded = hdevicereloaded or {}
 
 if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
 
@@ -21,11 +21,51 @@ else
 	file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
 end
 
-if SERVER then
-	local newGuthSCPconfig = guthscp.configs.guthscpkeycard
+function hdevicereloaded.load()
+	local newGuthSCP = guthscp.modules.guthscpkeycard
 
+	if not newGuthSCP then
+		print("HDevice reloaded - Guthen Keycard System not found, HDevice reloaded won't work without it.")
+		for k,v in pairs(player.GetAll()) do
+			v:ChatPrint("HDevice reloaded - Guthen Keycard System not found, HDevice reloaded won't work without it.")
+		end
+		return
+	end	
+
+	if GuthSCP then
+		print("HDevice reloaded - Guthen Keycard System found but outdated, HDevice reloaded won't work with a old version.")
+		for k,v in pairs(player.GetAll()) do
+			v:ChatPrint("HDevice reloaded - Guthen Keycard System found but outdated, HDevice reloaded won't work with a old version.")
+		end
+		return
+	end
+	
+	if file.Exists( "guth_scp/hdevice_blocked_buttons.txt", "DATA" ) then
+		local txt = file.Read( "guth_scp/hdevice_blocked_buttons.txt", "DATA" )
+		exceptionButtonID = util.JSONToTable( txt )
+		newGuthSCP.exceptionButtonID = exceptionButtonID
+		print( "HDevice reloaded - Buttons IDs loaded!" )
+	else
+		newGuthSCP.exceptionButtonID = {}
+	end
+end
+
+hook.Add( "PostCleanupMap", "HDevice:GetIDsbycleanup", function()
+	hdevicereloaded.load()
+end )
+
+hook.Add( "InitPostEntity", "HDevice:GetIDsbyentity", function()
+	hdevicereloaded.load()
+end )
+
+
+
+if SERVER then
     concommand.Add( "hdevice_block_button", function( ply )
 		if not ply:IsValid() or not ply:IsSuperAdmin() then return end
+		if not guthscp.configs.guthscpkeycard then return end
+
+		local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 
 		local ent = ply:GetEyeTrace().Entity
 		if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
@@ -39,13 +79,16 @@ if SERVER then
 		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
         file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
         
-        newGuthSCPH.exceptionButtonID = exceptionButtonID
+        newGuthSCP.exceptionButtonID = exceptionButtonID
 
 		ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Button ID has been saved" )
     end )
 
     concommand.Add( "hdevice_unblock_button", function( ply )
 		if not ply:IsValid() or not ply:IsSuperAdmin() then return end
+		if not guthscp.configs.guthscpkeycard then return end
+
+		local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 
 		local ent = ply:GetEyeTrace().Entity
 		if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
@@ -59,33 +102,8 @@ if SERVER then
 		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
 		file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
 
-        newGuthSCPH.exceptionButtonID = exceptionButtonID
+        newGuthSCP.exceptionButtonID = exceptionButtonID
 
 		ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Button ID has been saved" )
 	end )
 end
-
-hook.Add( "PlayerInitialSpawn", "HDevice:GetIDs", function()
-	
-	local newGuthSCP = guthscp.modules.guthscpkeycard
-
-	if GuthSCP then
-		print("HDevice-reloaded - Guthen Keycard System found but outdated, please update your keycard system, HDevice-reloaded will be disable while you don't update.")
-		return
-	elseif newGuthSCP then 
-		
-		if file.Exists( "guthscp/hdevice_reloaded_blockedb.txt", "DATA" ) then
-			local txt = file.Read( "guthscp/hdevice_reloaded_blockedb.txt", "DATA" )
-			exceptionButtonID = util.JSONToTable( txt )
-			newGuthSCPH.exceptionButtonID = exceptionButtonID
-			print( "HDevice-reloaded - Buttons IDs loaded!" )
-		else
-			newGuthSCPH.exceptionButtonID = {}
-		end
-
-		hook.Remove( "PlayerInitialSpawn", "HDevice:GetIDs" )
-	else
-		print("HDevice-reloaded - Guthen Keycard System not found, HDevice-reloaded won't work without it.")
-		return
-	end
-end )
