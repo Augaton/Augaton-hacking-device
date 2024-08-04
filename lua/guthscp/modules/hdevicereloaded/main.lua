@@ -127,12 +127,12 @@ MODULE.menu = {
 			icon = "guthscp/icons/steam.png",
 			url = "https://steamcommunity.com/sharedfiles/filedetails/?id=3302753364"
 		},
-		/*
 		{
 			text = "Discord",
 			icon = "guthscp/icons/discord.png",
-			url = "https://discord.gg/Yh5TWvPwhx",
+			url = "https://discord.gg/kJFQe95pgh",
 		},
+		/*
 		{
 			text = "Ko-fi",
 			icon = "guthscp/icons/kofi.png",
