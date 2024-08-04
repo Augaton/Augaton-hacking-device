@@ -1,6 +1,6 @@
 SWEP.PrintName			    = "SCP - Hacking Device"
 SWEP.Category				= "GuthSCP"
-SWEP.Author			        = "zgredinzyyy & Guthen"
+SWEP.Author			        = "Augaton & Guthen"
 SWEP.Instructions		    = "Press Left Mouse Button to hack nearest doors."
 
 SWEP.Spawnable              = true
@@ -79,9 +79,9 @@ SWEP.ViewModelBoneMods = {
 	["ValveBiped.Grenade_body"] = { scale = Vector( 0.009, 0.009, 0.009 ), pos = Vector( 0, 0, 0 ), angle = Angle( 0, 0, 0 ) }
 }
 
-
-local hackingdevice_hack_time = CreateConVar("hdevice_hack_time", "5", {FCVAR_REPLICATED,FCVAR_ARCHIVE}, "Amount of seconds needed for hacking device to open certain door.")
-local hackingdevice_hack_max = CreateConVar("hdevice_hack_max", "5", {FCVAR_REPLICATED,FCVAR_ARCHIVE}, "Highest level that the device can crack.")
+local confighdevice = guthscp.configs.hdevicereloaded
+local hackingdevice_hack_time = confighdevice.hdevice_hack_time
+local hackingdevice_hack_max = confighdevice.hdevice_hack_max
 
 local newGuthSCP = guthscp.modules.guthscpkeycard
 local newGuthSCPconfig = guthscp.configs.guthscpkeycard
@@ -89,7 +89,7 @@ local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 function SWEP:Success(ent)
 	self.isHacking = false
 	self.Owner:SetNWBool("isHacking", false)
-	if SERVER then guthscp.player_message( "Hacking Done!" ) end
+	if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_done ) end
 	ent:Use(self.Owner,ent,4,1) -- Opening Doors
 	self.Owner:EmitSound("ambient/energy/spark3.wav", 65, 100, 1, CHAN_AUTO) -- Sounds exported from HL2
 end
@@ -102,11 +102,17 @@ function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limit
 	self.isHacking = false
 	self.Owner:SetNWBool("isHacking", false)
 	if fail == 1 then
-		if SERVER then guthscp.player_message( self.Owner, "Hacking FAILED!" ) end
+		if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_failed ) end
 	elseif fail == 2 then
-		if SERVER then guthscp.player_message( self.Owner, "Hacking limited to LVL " .. hackingdevice_hack_max:GetInt() .. " Keycard" ) end
+	local max_text = guthscp.helpers.format_message(
+	confighdevice.translation_try_bigger_max,
+	{
+		level = hackingdevice_hack_max,
+	}
+	)
+		if SERVER then guthscp.player_message( self.Owner, max_text ) end
 	else
-		if SERVER then guthscp.player_message( self.Owner, "Can't hack this!" ) end 
+		if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_blocked ) end 
 	end
 end
 
@@ -124,25 +130,25 @@ function SWEP:PrimaryAttack()
 	if not newGuthSCP.exceptionButtonID then return end -- No buttons file
 	if not newGuthSCP.exceptionButtonID[game.GetMap()] then return end -- No setting for that map
 
-	if trLVL < 0 then if SERVER then guthscp.player_message( self.Owner, "No Hack needed !" ) end return end
+	if trLVL < 0 then if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_dont_need ) end return end
 
 	if not self.isHacking then
 		if IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL == 0 and not newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Open(ent)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max:GetInt() and not newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self.Owner:EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
-			if SERVER then guthscp.player_message( self.Owner, "Hacking Started!" ) end
+			if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_start ) end
 			self.isHacking = true
 			self.Owner:SetNWBool("isHacking", true)
 			self.startHack = CurTime()
-			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent)*hackingdevice_hack_time:GetInt()
+			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent)*hackingdevice_hack_time
 			self.Owner:SetNWInt("endHack", self.endHack)
 
 		elseif newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Failure(3)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max:GetInt() then
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
 			self:Failure(2)
 
 		end
@@ -184,18 +190,32 @@ function SWEP:DrawHUD()
 
 	local trg = ply:GetEyeTrace().Entity
 	local tr = self.Owner:GetEyeTrace()
+	local level = newGuthSCP.get_entity_level(trg)
 
 	if not IsValid( trg ) then return end
 	if not newGuthSCP then return end
 	if not newGuthSCPconfig.keycard_available_classes[ trg:GetClass() ] then return end
 	
-    if newGuthSCP.get_entity_level(trg) and tr.HitPos:Distance(ply:GetShootPos()) < 50 then
+    if level and tr.HitPos:Distance(ply:GetShootPos()) < 50 then
 
-		if newGuthSCP.get_entity_level(trg) < 0 then draw.SimpleText( "No hack needed", "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
+		if level < 0 then draw.SimpleText( confighdevice.translation_dont_need_hud, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
 
-		draw.SimpleText( "Keycard LVL Required: " .. newGuthSCP.get_entity_level(trg), "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-		if newGuthSCP.get_entity_level(trg) ~= 0 then
-			draw.SimpleText( "Estimated Hack Time: " .. newGuthSCP.get_entity_level(trg)*hackingdevice_hack_time:GetInt() .. "s", "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+		local huddoorlevel = guthscp.helpers.format_message(
+		confighdevice.translation_level_hud,
+		{
+			level = level,
+		}
+		)
+		draw.SimpleText( huddoorlevel, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+
+		local huddoorlevel = guthscp.helpers.format_message(
+		confighdevice.translation_estimated_time_hud,
+		{
+			time = level*hackingdevice_hack_time,
+		}
+		)
+		if level ~= 0 then
+			draw.SimpleText( huddoorlevel , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 		end
 
 		if ply:GetNWBool("isHacking") then
@@ -203,12 +223,12 @@ function SWEP:DrawHUD()
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 1.5 )
 
 			surface.SetDrawColor(0,175,0,255)
-			surface.DrawRect(ScrW()/2-50, ScrH()/2+40, ((self.Owner:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time:GetInt()*newGuthSCP.get_entity_level(trg)))*100, 20)
+			surface.DrawRect(ScrW()/2-50, ScrH()/2+40, ((self.Owner:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
 			
 			surface.SetDrawColor( 175, 255, 0, 50 )
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 10 )
 
-			draw.SimpleText(math.Round(((ply:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time:GetInt()*newGuthSCP.get_entity_level(trg)))*100, 1) .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(math.Round((ply:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level)*100, 1) .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 	
