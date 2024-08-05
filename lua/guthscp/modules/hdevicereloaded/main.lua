@@ -1,7 +1,7 @@
 local MODULE = {
 	name = "Hacking Device",
 	author = "Augaton",
-	version = "1.0.1",
+	version = "1.0.2",
 	description = [[Control what the CI do with their Hacking Device.]],
 	icon = "icon16/key.png",
 	version_url = "https://raw.githubusercontent.com/augaton/scp-hacking-device-reloaded/main/lua/guthscp/modules/hdevicereloaded/main.lua",
@@ -10,11 +10,7 @@ local MODULE = {
         guthscpkeycard = "2.1.4",
 	},
 	requires = {
-        /*
-		["shared.lua"] = guthscp.REALMS.SHARED,
 		["server.lua"] = guthscp.REALMS.SERVER,
-		["client.lua"] = guthscp.REALMS.CLIENT,
-        */
 	},
 }
 

@@ -79,6 +79,7 @@ SWEP.ViewModelBoneMods = {
 	["ValveBiped.Grenade_body"] = { scale = Vector( 0.009, 0.009, 0.009 ), pos = Vector( 0, 0, 0 ), angle = Angle( 0, 0, 0 ) }
 }
 
+local hdevicereloaded = guthscp.modules.hdevicereloaded
 local confighdevice = guthscp.configs.hdevicereloaded
 local hackingdevice_hack_time = confighdevice.hdevice_hack_time
 local hackingdevice_hack_max = confighdevice.hdevice_hack_max
@@ -127,16 +128,16 @@ function SWEP:PrimaryAttack()
 	-- check if everything ok
 	if not newGuthSCP then return end -- If no Base Guthen Keycard sys = end
 	if not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then return end -- No keycard table
-	if not newGuthSCP.exceptionButtonID then return end -- No buttons file
-	if not newGuthSCP.exceptionButtonID[game.GetMap()] then return end -- No setting for that map
+	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
+	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then return end -- No setting for that map
 
 	if trLVL < 0 then if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_dont_need ) end return end
 
 	if not self.isHacking then
-		if IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL == 0 and not newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		if IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL == 0 and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Open(ent)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self.Owner:EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
 			if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_start ) end
 			self.isHacking = true
@@ -145,7 +146,7 @@ function SWEP:PrimaryAttack()
 			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent)*hackingdevice_hack_time
 			self.Owner:SetNWInt("endHack", self.endHack)
 
-		elseif newGuthSCP.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Failure(3)
 
 		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
@@ -190,12 +191,12 @@ function SWEP:DrawHUD()
 
 	local trg = ply:GetEyeTrace().Entity
 	local tr = self.Owner:GetEyeTrace()
-	local level = newGuthSCP.get_entity_level(trg)
 
 	if not IsValid( trg ) then return end
-	if not newGuthSCP then return end
 	if not newGuthSCPconfig.keycard_available_classes[ trg:GetClass() ] then return end
 	
+	local level = newGuthSCP.get_entity_level(trg)
+
     if level and tr.HitPos:Distance(ply:GetShootPos()) < 50 then
 
 		if level < 0 then draw.SimpleText( confighdevice.translation_dont_need_hud, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
