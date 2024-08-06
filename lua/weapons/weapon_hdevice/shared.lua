@@ -247,14 +247,6 @@ end
 
 function SWEP:Initialize()
 
-	if GuthSCP then 
-		self.Owner:ChatPrint("HDevice-reloaded - Guthen Keycard System found but outdated, please update your keycard system, HDevice-reloaded will be disable while you don't update.")
-	end
-
-	if not GuthSCP and not newGuthSCP then
-		self.Owner:ChatPrint("HDevice-reloaded - Guthen Keycard System not found, HDevice-reloaded won't work without it.")
-	end
-
 	if CLIENT then
 	
 		// Create a new table for every weapon instance
