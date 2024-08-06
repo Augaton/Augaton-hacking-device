@@ -209,10 +209,12 @@ function SWEP:DrawHUD()
 		)
 		draw.SimpleText( huddoorlevel, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 
+		local equation = level*hackingdevice_hack_time
+
 		local huddoorlevel = guthscp.helpers.format_message(
 		confighdevice.translation_estimated_time_hud,
 		{
-			time = level*hackingdevice_hack_time,
+			time = equation,
 		}
 		)
 		if level ~= 0 then
@@ -229,7 +231,11 @@ function SWEP:DrawHUD()
 			surface.SetDrawColor( 175, 255, 0, 50 )
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 10 )
 
-			draw.SimpleText(math.Round((ply:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level)*100, 1) .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			local percent = math.Round((ply:GetNWInt("endHack")-CurTime())/(equation)*100, 1)
+
+			if percent < 0 then percent = 0 end
+
+			draw.SimpleText( percent  .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 	
@@ -713,5 +719,4 @@ if CLIENT then
 	end
 	
 end
-
 
