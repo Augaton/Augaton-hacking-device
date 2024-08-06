@@ -231,11 +231,11 @@ function SWEP:DrawHUD()
 			surface.SetDrawColor( 175, 255, 0, 50 )
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 10 )
 
-			local percent = math.Round((ply:GetNWInt("endHack")-CurTime())/(equation)*100, 1)
+			local percent = (ply:GetNWInt("endHack")-CurTime())/(equation)*100
 
 			if percent < 0 then percent = 0 end
 
-			draw.SimpleText( percent  .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText( math.Round(percent, 1)  .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 	
