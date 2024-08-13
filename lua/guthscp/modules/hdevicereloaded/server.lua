@@ -14,6 +14,8 @@ if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
 local map_name = game.GetMap()
 local path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
 
+hdevicereloaded.exceptionButtonID = {}
+
 if not file.Exists(path, "DATA")then
 	hdevicereloaded.exceptionButtonID[game.GetMap()] = {}
 	file.Write( path, util.TableToJSON( exceptionButtonID ) )
@@ -44,52 +46,60 @@ hook.Add( "InitPostEntity", "HDevice:GetIDsbyentity", function()
 end )
 
 
+function hdevicereloaded.addblockbutton(ply)
+	if not ply:IsValid() or not ply:IsSuperAdmin() then return end
+	if not guthscp.configs.guthscpkeycard then return end
+
+	local newGuthSCPconfig = guthscp.configs.guthscpkeycard
+
+	local ent = ply:GetEyeTrace().Entity
+	if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
+		guthscp.player_message( ply, "HDevice - Invalid entity selected!" )
+		return
+	end
+
+	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
+	hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = true
+
+	if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
+	file.Write( path, util.TableToJSON( exceptionButtonID ) )
+	
+	hdevicereloaded.exceptionButtonID = exceptionButtonID
+
+	guthscp.player_message( ply, "HDevice - The button has been succesfully blocked" )
+end
+
+function hdevicereloaded.removeblockbutton(ply)
+	if not ply:IsValid() or not ply:IsSuperAdmin() then return end
+	if not guthscp.configs.guthscpkeycard then return end
+
+	local newGuthSCPconfig = guthscp.configs.guthscpkeycard
+
+	local ent = ply:GetEyeTrace().Entity
+	if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
+		guthscp.player_message( ply, "HDevice - Invalid entity selected!" )
+		return
+	end
+
+	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
+	hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = nil
+
+	if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
+	file.Write( path, util.TableToJSON( exceptionButtonID ) )
+
+	hdevicereloaded.exceptionButtonID = exceptionButtonID
+
+	guthscp.player_message( ply, "HDevice - The button has been succesfully unblocked" )
+end
+
+
 
 if SERVER then
     concommand.Add( "hdevice_block_button", function( ply )
-		if not ply:IsValid() or not ply:IsSuperAdmin() then return end
-		if not guthscp.configs.guthscpkeycard then return end
-
-
-		local newGuthSCPconfig = guthscp.configs.guthscpkeycard
-
-		local ent = ply:GetEyeTrace().Entity
-		if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
-			ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Invalid entity selected!" )
-			return
-		end
-
-		if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
-		hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = true
-
-		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
-        file.Write( path, util.TableToJSON( exceptionButtonID ) )
-        
-        hdevicereloaded.exceptionButtonID = exceptionButtonID
-
-		ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Button ID has been saved" )
+		hdevicereloaded.addblockbutton(ply)
     end )
 
     concommand.Add( "hdevice_unblock_button", function( ply )
-		if not ply:IsValid() or not ply:IsSuperAdmin() then return end
-		if not guthscp.configs.guthscpkeycard then return end
-
-		local newGuthSCPconfig = guthscp.configs.guthscpkeycard
-
-		local ent = ply:GetEyeTrace().Entity
-		if not IsValid( ent ) or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then 
-			ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Invalid entity selected!" )
-			return
-		end
-
-		if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
-		hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = nil
-
-		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
-		file.Write( path, util.TableToJSON( exceptionButtonID ) )
-
-        hdevicereloaded.exceptionButtonID = exceptionButtonID
-
-		ply:PrintMessage( HUD_PRINTCONSOLE, "HDevice - Button ID has been saved" )
+		hdevicereloaded.removeblockbutton(ply)
 	end )
 end

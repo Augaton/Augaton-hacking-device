@@ -132,14 +132,15 @@ MODULE.menu = {
 }
 
 function MODULE:init()
-	PrintTable( hook.GetTable() )
 
 	--  warn for old version
 	timer.Simple( 0, function()
-		if hook.GetTable()["PlayerInitialSpawn"]["HDevice:GetIDs"] then
-			local text = "The old version of this addon is currently running on this server. Please, delete the '[SCP] Hacking Device by zgredinzyyy' addon to avoid any possible conflicts."
-			self:add_error( text )
-			self:error( text )
+		if hook.GetTable()["PlayerInitialSpawn"] then
+			if hook.GetTable()["PlayerInitialSpawn"]["HDevice:GetIDs"] then
+				local text = "The old version of this addon is currently running on this server. Please, delete the '[SCP] Hacking Device by zgredinzyyy' addon to avoid any possible conflicts."
+				self:add_error( text )
+				self:error( text )
+			end
 		end
 	end )
 
