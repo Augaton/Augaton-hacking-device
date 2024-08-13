@@ -1,7 +1,7 @@
 if not guthscp then return end
 
 TOOL.Category = "GuthSCP"
-TOOL.Name = "#tool.guthscp_hdevicereloaded.name"
+TOOL.Name = "#tool.hdevice_block_tool.name"
 
 local hdevicereloaded = guthscp.modules.hdevicereloaded
 local config = guthscp.configs.guthscpkeycard
@@ -19,14 +19,14 @@ if CLIENT then
 	}
 
 	--  language
-	language.Add( "tool.guthscp_hdevicereloaded.name", "Hdevice button blocker" )
-	language.Add( "tool.guthscp_hdevicereloaded.desc", "allows you to block buttons on the hacking device." )
-	language.Add( "tool.guthscp_hdevicereloaded.left", "Add looked entity to the block list" )
-	language.Add( "tool.guthscp_hdevicereloaded.right", "Remove looked entity from the block list" )
+	language.Add( "tool.hdevice_block_tool.name", "Hdevice button blocker" )
+	language.Add( "tool.hdevice_block_tool.desc", "allows you to block buttons on the hacking device." )
+	language.Add( "tool.hdevice_block_tool.left", "Add looked entity to the block list" )
+	language.Add( "tool.hdevice_block_tool.right", "Remove looked entity from the block list" )
 
 	--  context panel
 	function TOOL.BuildCPanel( cpanel )
-		cpanel:AddControl( "Header", { Description = "#tool.guthscp_hdevicereloaded.desc" } )
+		cpanel:AddControl( "Header", { Description = "#tool.hdevice_block_tool.desc" } )
 	end
 
 	local color_red = Color( 255, 0, 0 )
