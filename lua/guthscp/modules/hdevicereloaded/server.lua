@@ -11,19 +11,22 @@ local hdevicereloaded = guthscp.modules.hdevicereloaded
 
 if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
 
-if not file.Exists("guthscp/hdevice_reloaded_blockedb.txt", "DATA")then
-	exceptionButtonID[game.GetMap()] = {}
-	file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
+local map_name = game.GetMap()
+local path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
+
+if not file.Exists(path, "DATA")then
+	hdevicereloaded.exceptionButtonID[game.GetMap()] = {}
+	file.Write( path, util.TableToJSON( exceptionButtonID ) )
 else
-	local txt = file.Read( "guthscp/hdevice_reloaded_blockedb.txt", "DATA" )
+	local txt = file.Read( path, "DATA" )
     exceptionButtonID = util.JSONToTable( txt )
-	if not exceptionButtonID[game.GetMap()] then exceptionButtonID[game.GetMap()] = {} end
-	file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
+	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
+	file.Write( path, util.TableToJSON( exceptionButtonID ) )
 end
 
 function hdevicereloaded.load()
-	if file.Exists( "guth_scp/hdevice_blocked_buttons.txt", "DATA" ) then
-		local txt = file.Read( "guth_scp/hdevice_blocked_buttons.txt", "DATA" )
+	if file.Exists( path, "DATA" ) then
+		local txt = file.Read( path, "DATA" )
 		exceptionButtonID = util.JSONToTable( txt )
 		hdevicereloaded.exceptionButtonID = exceptionButtonID
 		print( "HDevice reloaded - Buttons IDs loaded!" )
@@ -56,11 +59,11 @@ if SERVER then
 			return
 		end
 
-		if not exceptionButtonID[game.GetMap()] then exceptionButtonID[game.GetMap()] = {} end
-		exceptionButtonID[game.GetMap()][ent:MapCreationID()] = true
+		if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
+		hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = true
 
 		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
-        file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
+        file.Write( path, util.TableToJSON( exceptionButtonID ) )
         
         hdevicereloaded.exceptionButtonID = exceptionButtonID
 
@@ -79,11 +82,11 @@ if SERVER then
 			return
 		end
 
-		if not exceptionButtonID[game.GetMap()] then exceptionButtonID[game.GetMap()] = {} end
-		exceptionButtonID[game.GetMap()][ent:MapCreationID()] = nil
+		if not hdevicereloaded.exceptionButtonID[game.GetMap()] then hdevicereloaded.exceptionButtonID[game.GetMap()] = {} end
+		hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] = nil
 
 		if not file.Exists( "guthscp", "DATA" ) then file.CreateDir( "guthscp" ) end
-		file.Write( "guthscp/hdevice_reloaded_blockedb.txt", util.TableToJSON( exceptionButtonID ) )
+		file.Write( path, util.TableToJSON( exceptionButtonID ) )
 
         hdevicereloaded.exceptionButtonID = exceptionButtonID
 
