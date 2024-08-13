@@ -4,6 +4,7 @@ TOOL.Category = "GuthSCP"
 TOOL.Name = "#tool.guthscp_hdevicereloaded.name"
 
 local hdevicereloaded = guthscp.modules.hdevicereloaded
+local config = guthscp.configs.guthscpkeycard
 
 --  languages
 if CLIENT then
@@ -31,38 +32,20 @@ if CLIENT then
 	local color_red = Color( 255, 0, 0 )
 	function TOOL:DrawHUD()
 		local x, y = ScrW() / 2, ScrH() * .75
-		local ent = LocalPlayer():GetEyeTrace().Entity
+		local ent = LocalPlayer():GetUseEntity()
 		if not IsValid( ent ) then return end
 
-		--  NOTE: This warning is not exact, it doesn't say if you're actually authorized to use the tool. A hook.Run to "CanTool" could be useful here. 
-		--  	  However it would need to be done in each tool. For now, this should be enough.
-		if FPP and not FPP.canTouchEnt( ent, "Toolgun" ) then
-			local text = "Falco's Prop Protection prevent you from editing this entity, please ensure both 'Admins can use tool on world/blocked entities' are enabled in the 'Toolgun options'!"
-			draw.SimpleText( text, "DermaDefaultBold", x, y + 30, color_red, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-		end
+        local can_be_used = config.keycard_available_classes[ent:GetClass()]
+
+        --  alert from FPP prohibition 
+        if FPP and not FPP.canTouchEnt( ent, "Toolgun" ) then
+            text_info = "Falco's Prop Protection prevent you from editing this entity, please ensure both 'Admins can use tool on world/blocked entities' are enabled in the 'Toolgun options'!"
+        end
+
+        --  draw entity
+        draw.SimpleText( "Target: " .. tostring( ent ), "Trebuchet24", x, y, can_be_used and color_white or color_red, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	end
 
-    /*
-	hook.Add( "PreDrawHalos", "guthscp:map_entities_filter_configurator", function()
-		local ply = LocalPlayer()
-
-		local active_weapon = ply:GetActiveWeapon()
-		if not IsValid( active_weapon ) or active_weapon:GetClass() ~= "gmod_tool" then return end
-
-		local tool = ply:GetTool()
-		if not istable( tool ) or tool.Mode ~= guthscp.filter.tool_mode then return end
-
-		--  get filter
-		local filter_id = tool:GetClientInfo( "filter_id" )
-		if #filter_id == 0 then return end
-
-		local filter = guthscp.filters[filter_id]
-		assert( filter, "Filter '" .. filter_id .. "' doesn't exists!" )
-
-		--  draw halos
-		halo.Add( filter:get_entities(), Color( 255, 0, 0 ), 2, 2, 1, true, true )
-	end )
-    */
 end
 
 --  add access

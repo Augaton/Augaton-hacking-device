@@ -92,8 +92,6 @@ function hdevicereloaded.removeblockbutton(ply)
 	guthscp.player_message( ply, "HDevice - The button has been succesfully unblocked" )
 end
 
-
-
 if SERVER then
     concommand.Add( "hdevice_block_button", function( ply )
 		hdevicereloaded.addblockbutton(ply)
