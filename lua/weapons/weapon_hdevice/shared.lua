@@ -96,7 +96,7 @@ function SWEP:Success(ent)
 end
 
 function SWEP:Open(ent)
-	ent:Use(self:GetOwner(),ent,4,1)
+	ent:Fire("Press", nil, 1, ent)
 end
 
 function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limited to certain LVL, else = Button blocked
@@ -137,11 +137,10 @@ function SWEP:PrimaryAttack()
 	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
 
 	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
-
 	if self.isHacking then return end
 	if not IsValid(ent) then return end
-	if not tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 then return end
-	if not isButtonExempt(ent:MapCreationID()) then
+	if tr.HitPos:Distance(self:GetOwner():GetShootPos()) > 50 then return end
+	if trLVL == 0 and not isButtonExempt(ent:MapCreationID()) then
 		self:Open(ent)
 
 	elseif trLVL <= hackingdevice_hack_max and not isButtonExempt(ent:MapCreationID()) then
