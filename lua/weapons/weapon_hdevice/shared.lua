@@ -129,7 +129,6 @@ function SWEP:PrimaryAttack()
 	if not newGuthSCP then return end -- If no Base Guthen Keycard sys = end
 	if not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then return end -- No keycard table
 	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
-	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then return end -- No setting for that map
 
 	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
 
@@ -145,7 +144,7 @@ function SWEP:PrimaryAttack()
 			self.startHack = CurTime()
 			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
 			self:GetOwner():SetNWInt("endHack", self.endHack)
-		elseif hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif hdevicereloaded.exceptionButtonID[game.GetMap()] and hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Failure(3)
 
 		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
