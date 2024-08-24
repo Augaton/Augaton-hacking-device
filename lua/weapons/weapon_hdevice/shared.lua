@@ -117,6 +117,12 @@ function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limit
 	end
 end
 
+local function isButtonExempt(id)
+	if not hdevicereloaded.exceptionButtonID then return false end
+	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then return false end
+	return hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] 
+end
+
 function SWEP:PrimaryAttack()
 
 	self.nextFire = 0
@@ -133,10 +139,10 @@ function SWEP:PrimaryAttack()
 	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
 
 	if not self.isHacking then
-		if IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL == 0 and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		if IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL == 0 and not isButtonExempt(ent:MapCreationID()) then
 			self:Open(ent)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not isButtonExempt(ent:MapCreationID()) then
 			self:GetOwner():EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
 			if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_start ) end
 			self.isHacking = true
@@ -144,7 +150,7 @@ function SWEP:PrimaryAttack()
 			self.startHack = CurTime()
 			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
 			self:GetOwner():SetNWInt("endHack", self.endHack)
-		elseif hdevicereloaded.exceptionButtonID[game.GetMap()] and hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		elseif isButtonExempt(ent:MapCreationID()) then
 			self:Failure(3)
 
 		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
