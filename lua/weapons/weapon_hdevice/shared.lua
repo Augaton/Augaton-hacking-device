@@ -143,9 +143,8 @@ function SWEP:PrimaryAttack()
 			self.isHacking = true
 			self:GetOwner():SetNWBool("isHacking", true)
 			self.startHack = CurTime()
-			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent)*hackingdevice_hack_time
+			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
 			self:GetOwner():SetNWInt("endHack", self.endHack)
-
 		elseif hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Failure(3)
 
@@ -169,7 +168,6 @@ function SWEP:Think()
 	end
 
 	if self.isHacking and IsValid(ply) then
-		local tr = self:GetOwner():GetEyeTrace()	
 		if not IsValid(tr.Entity) or tr.HitPos:Distance(ply:GetShootPos()) > 50 or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then
 			self:Failure(1)
 		elseif self.endHack <= CurTime() then
