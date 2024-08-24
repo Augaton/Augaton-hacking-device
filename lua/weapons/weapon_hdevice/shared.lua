@@ -197,26 +197,26 @@ function SWEP:DrawHUD()
 
     if level and tr.HitPos:Distance(ply:GetShootPos()) < 50 then
 
-		if level < 0 then draw.SimpleText( confighdevice.translation_dont_need_hud, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
+		if level < 0 then draw.SimpleText( confighdevice.translation_dont_need_hud, "ChatFont", ScrW() / 2 + 50, ScrH() / 2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
 
-		local huddoorlevel = guthscp.helpers.format_message(
+		local hud_door_level = guthscp.helpers.format_message(
 		confighdevice.translation_level_hud,
 		{
 			level = level,
 		}
 		)
-		draw.SimpleText( huddoorlevel, "ChatFont", ScrW()/2+50, ScrH()/2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+		draw.SimpleText( hud_door_level, "ChatFont", ScrW() / 2 + 50, ScrH() / 2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 
-		local equation = level*hackingdevice_hack_time
+		local equation = level * hackingdevice_hack_time
 
-		local huddoorlevel = guthscp.helpers.format_message(
+		local hud_time_estimate = guthscp.helpers.format_message(
 		confighdevice.translation_estimated_time_hud,
 		{
 			time = equation,
 		}
 		)
 		if level ~= 0 then
-			draw.SimpleText( huddoorlevel , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+			draw.SimpleText( hud_time_estimate , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 		end
 
 		if ply:GetNWBool("isHacking") then
@@ -224,16 +224,16 @@ function SWEP:DrawHUD()
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 1.5 )
 
 			surface.SetDrawColor(0,175,0,255)
-			surface.DrawRect(ScrW()/2-50, ScrH()/2+40, ((self:GetOwner():GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
+			surface.DrawRect(ScrW() / 2-50, ScrH() / 2+40, ((self:GetOwner():GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
 			
 			surface.SetDrawColor( 175, 255, 0, 50 )
-			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 10 )
+			surface.DrawOutlinedRect( ScrW() / 2-50, ScrH()/2+40, 100, 20, 10 )
 
-			local percent = (ply:GetNWInt("endHack")-CurTime())/(equation)*100
+			local percent = (ply:GetNWInt("endHack") - CurTime()) / equation * 100
 
 			if percent < 0 then percent = 0 end
 
-			draw.SimpleText( math.Round(percent, 1)  .. "%", "ChatFont", ScrW()/2, ScrH()/2+50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText( math.Round(percent, 1)  .. "%", "ChatFont", ScrW() / 2, ScrH() / 2 + 50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 	
@@ -360,9 +360,9 @@ if CLIENT then
 				end
 				
 				if (v.bodygroup) then
-					for k, v in pairs( v.bodygroup ) do
-						if (model:GetBodygroup(k) != v) then
-							model:SetBodygroup(k, v)
+					for bodygroup_key, bodygroup_value in pairs( v.bodygroup ) do
+						if (model:GetBodygroup(bodygroup_key) != v) then
+							model:SetBodygroup(bodygroup_key, v)
 						end
 					end
 				end
@@ -371,8 +371,8 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
-				render.SetBlend(v.color.a/255)
+				render.SetColorModulation(v.color.r / 255, v.color.g / 255, v.color.b / 255)
+				render.SetBlend(v.color.a / 255)
 				model:DrawModel()
 				render.SetBlend(1)
 				render.SetColorModulation(1, 1, 1)
@@ -488,8 +488,8 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
-				render.SetBlend(v.color.a/255)
+				render.SetColorModulation(v.color.r / 255, v.color.g / 255, v.color.b / 255)
+				render.SetBlend(v.color.a / 255)
 				model:DrawModel()
 				render.SetBlend(1)
 				render.SetColorModulation(1, 1, 1)
@@ -583,18 +583,18 @@ if CLIENT then
 				end
 				
 			elseif (v.type == "Sprite" and v.sprite and v.sprite != "" and (!v.spriteMaterial or v.createdSprite != v.sprite) 
-				and file.Exists ("materials/"..v.sprite..".vmt", "GAME")) then
+				and file.Exists ("materials/" .. v.sprite .. ".vmt", "GAME")) then
 				
-				local name = v.sprite.."-"
+				local name = v.sprite .. "-"
 				local params = { ["$basetexture"] = v.sprite }
 				// make sure we create a unique name based on the selected options
 				local tocheck = { "nocull", "additive", "vertexalpha", "vertexcolor", "ignorez" }
 				for i, j in pairs( tocheck ) do
 					if (v[j]) then
-						params["$"..j] = 1
-						name = name.."1"
+						params["$" .. j] = 1
+						name = name .. "1"
 					else
-						name = name.."0"
+						name = name .. "0"
 					end
 				end
 
@@ -620,7 +620,7 @@ if CLIENT then
 			local loopthrough = self.ViewModelBoneMods
 			if (!hasGarryFixedBoneScalingYet) then
 				allbones = {}
-				for i=0, vm:GetBoneCount() do
+				for i = 0, vm:GetBoneCount() do
 					local bonename = vm:GetBoneName(i)
 					if (self.ViewModelBoneMods[bonename]) then 
 						allbones[bonename] = self.ViewModelBoneMods[bonename]
@@ -647,7 +647,7 @@ if CLIENT then
 				local ms = Vector(1,1,1)
 				if (!hasGarryFixedBoneScalingYet) then
 					local cur = vm:GetBoneParent(bone)
-					while(cur >= 0) do
+					while (cur >= 0) do
 						local pscale = loopthrough[vm:GetBoneName(cur)].scale
 						ms = ms * pscale
 						cur = vm:GetBoneParent(cur)
@@ -676,7 +676,7 @@ if CLIENT then
 	function SWEP:ResetBonePositions(vm)
 		
 		if (!vm:GetBoneCount()) then return end
-		for i=0, vm:GetBoneCount() do
+		for i = 0, vm:GetBoneCount() do
 			vm:ManipulateBoneScale( i, Vector(1, 1, 1) )
 			vm:ManipulateBoneAngles( i, Angle(0, 0, 0) )
 			vm:ManipulateBonePosition( i, Vector(0, 0, 0) )
