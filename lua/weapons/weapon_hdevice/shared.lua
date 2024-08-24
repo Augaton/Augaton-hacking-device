@@ -91,12 +91,12 @@ function SWEP:Success(ent)
 	self.isHacking = false
 	self:GetOwner():SetNWBool("isHacking", false)
 	if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_done ) end
-	ent:Use(self:GetOwner(),ent,4,1) -- Opening Doors
+	ent:Use(self:GetOwner(), ent, 4, 1)
 	self:GetOwner():EmitSound("ambient/energy/spark3.wav", 65, 100, 1, CHAN_AUTO) -- Sounds exported from HL2
 end
 
 function SWEP:Open(ent)
-	ent:Fire("Press", nil, 1, ent)
+	ent:Use(self:GetOwner(), ent, 4, 1)
 end
 
 function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limited to certain LVL, else = Button blocked
