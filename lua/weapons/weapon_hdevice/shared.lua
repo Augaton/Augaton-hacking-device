@@ -89,21 +89,21 @@ local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 
 function SWEP:Success(ent)
 	self.isHacking = false
-	self.Owner:SetNWBool("isHacking", false)
-	if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_done ) end
-	ent:Use(self.Owner,ent,4,1) -- Opening Doors
-	self.Owner:EmitSound("ambient/energy/spark3.wav", 65, 100, 1, CHAN_AUTO) -- Sounds exported from HL2
+	self:GetOwner():SetNWBool("isHacking", false)
+	if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_done ) end
+	ent:Use(self:GetOwner(),ent,4,1) -- Opening Doors
+	self:GetOwner():EmitSound("ambient/energy/spark3.wav", 65, 100, 1, CHAN_AUTO) -- Sounds exported from HL2
 end
 
 function SWEP:Open(ent)
-	ent:Use(self.Owner,ent,4,1)
+	ent:Use(self:GetOwner(),ent,4,1)
 end
 
 function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limited to certain LVL, else = Button blocked
 	self.isHacking = false
-	self.Owner:SetNWBool("isHacking", false)
+	self:GetOwner():SetNWBool("isHacking", false)
 	if fail == 1 then
-		if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_failed ) end
+		if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_failed ) end
 	elseif fail == 2 then
 	local max_text = guthscp.helpers.format_message(
 	confighdevice.translation_try_bigger_max,
@@ -111,9 +111,9 @@ function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limit
 		level = hackingdevice_hack_max,
 	}
 	)
-		if SERVER then guthscp.player_message( self.Owner, max_text ) end
+		if SERVER then guthscp.player_message( self:GetOwner(), max_text ) end
 	else
-		if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_blocked ) end 
+		if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_blocked ) end 
 	end
 end
 
@@ -121,7 +121,7 @@ function SWEP:PrimaryAttack()
 
 	self.nextFire = 0
 
-    local tr = self.Owner:GetEyeTrace()
+    local tr = self:GetOwner():GetEyeTrace()
 	local ent = tr.Entity
 	local trLVL = newGuthSCP.get_entity_level(ent)
 
@@ -131,25 +131,25 @@ function SWEP:PrimaryAttack()
 	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
 	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then return end -- No setting for that map
 
-	if trLVL < 0 then if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_dont_need ) end return end
+	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
 
 	if not self.isHacking then
-		if IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL == 0 and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+		if IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL == 0 and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Open(ent)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
-			self.Owner:EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
-			if SERVER then guthscp.player_message( self.Owner, confighdevice.translation_start ) end
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL <= hackingdevice_hack_max and not hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
+			self:GetOwner():EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
+			if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_start ) end
 			self.isHacking = true
-			self.Owner:SetNWBool("isHacking", true)
+			self:GetOwner():SetNWBool("isHacking", true)
 			self.startHack = CurTime()
 			self.endHack = CurTime() + newGuthSCP.get_entity_level(ent)*hackingdevice_hack_time
-			self.Owner:SetNWInt("endHack", self.endHack)
+			self:GetOwner():SetNWInt("endHack", self.endHack)
 
 		elseif hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] then
 			self:Failure(3)
 
-		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self.Owner:GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
+		elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
 			self:Failure(2)
 
 		end
@@ -159,7 +159,7 @@ end
 function SWEP:SecondaryAttack() end
 
 function SWEP:Think()
-    local tr = self.Owner:GetEyeTrace()
+    local tr = self:GetOwner():GetEyeTrace()
 	local ent = tr.Entity
 	local ply = self:GetOwner()
 
@@ -169,7 +169,7 @@ function SWEP:Think()
 	end
 
 	if self.isHacking and IsValid(ply) then
-		local tr = self.Owner:GetEyeTrace()	
+		local tr = self:GetOwner():GetEyeTrace()	
 		if not IsValid(tr.Entity) or tr.HitPos:Distance(ply:GetShootPos()) > 50 or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then
 			self:Failure(1)
 		elseif self.endHack <= CurTime() then
@@ -190,7 +190,7 @@ function SWEP:DrawHUD()
 	if not IsValid( ply ) or not ply:Alive() then return end
 
 	local trg = ply:GetEyeTrace().Entity
-	local tr = self.Owner:GetEyeTrace()
+	local tr = self:GetOwner():GetEyeTrace()
 
 	if not IsValid( trg ) then return end
 	if not newGuthSCPconfig.keycard_available_classes[ trg:GetClass() ] then return end
@@ -226,7 +226,7 @@ function SWEP:DrawHUD()
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 1.5 )
 
 			surface.SetDrawColor(0,175,0,255)
-			surface.DrawRect(ScrW()/2-50, ScrH()/2+40, ((self.Owner:GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
+			surface.DrawRect(ScrW()/2-50, ScrH()/2+40, ((self:GetOwner():GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
 			
 			surface.SetDrawColor( 175, 255, 0, 50 )
 			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 10 )
@@ -258,8 +258,8 @@ function SWEP:Initialize()
 		self:CreateModels(self.WElements) // create worldmodels
 		
 		// init view model bone build function
-		if IsValid(self.Owner) then
-			local vm = self.Owner:GetViewModel()
+		if IsValid(self:GetOwner()) then
+			local vm = self:GetOwner():GetViewModel()
 			if IsValid(vm) then
 				self:ResetBonePositions(vm)
 				
@@ -282,8 +282,8 @@ end
 
 function SWEP:Holster()
 	
-	if CLIENT and IsValid(self.Owner) then
-		local vm = self.Owner:GetViewModel()
+	if CLIENT and IsValid(self:GetOwner()) then
+		local vm = self:GetOwner():GetViewModel()
 		if IsValid(vm) then
 			self:ResetBonePositions(vm)
 		end
@@ -301,7 +301,7 @@ if CLIENT then
 	SWEP.vRenderOrder = nil
 	function SWEP:ViewModelDrawn()
 		
-		local vm = self.Owner:GetViewModel()
+		local vm = self:GetOwner():GetViewModel()
 		if !IsValid(vm) then return end
 		
 		if (!self.VElements) then return end
@@ -429,8 +429,8 @@ if CLIENT then
 
 		end
 		
-		if (IsValid(self.Owner)) then
-			bone_ent = self.Owner
+		if (IsValid(self:GetOwner())) then
+			bone_ent = self:GetOwner()
 		else
 			// when the weapon is dropped
 			bone_ent = self
@@ -555,8 +555,8 @@ if CLIENT then
 				pos, ang = m:GetTranslation(), m:GetAngles()
 			end
 			
-			if (IsValid(self.Owner) and self.Owner:IsPlayer() and 
-				ent == self.Owner:GetViewModel() and self.ViewModelFlip) then
+			if (IsValid(self:GetOwner()) and self:GetOwner():IsPlayer() and 
+				ent == self:GetOwner():GetViewModel() and self.ViewModelFlip) then
 				ang.r = -ang.r // Fixes mirrored models
 			end
 		
