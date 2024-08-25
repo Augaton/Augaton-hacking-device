@@ -120,7 +120,7 @@ end
 local function isButtonExempt(id)
 	if not hdevicereloaded.exceptionButtonID then return false end
 	if not hdevicereloaded.exceptionButtonID[game.GetMap()] then return false end
-	return hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()] 
+	return hdevicereloaded.exceptionButtonID[game.GetMap()][id]
 end
 
 function SWEP:PrimaryAttack()
