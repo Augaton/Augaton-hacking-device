@@ -22,6 +22,8 @@ If you create something derived from this, please credit me (you can also tell m
 ## Credit
 huge thank's to Guthen !
 
+thank's also to flyingkarii for some help !
+
 addon from zgredinzyyy (alias zinzy)
 
 original addon : https://steamcommunity.com/sharedfiles/filedetails/?id=2019852698
