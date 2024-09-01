@@ -136,6 +136,8 @@ function SWEP:PrimaryAttack()
 	if not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then return end -- No keycard table
 	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
 
+	timeridentity = "Hackingsound: "..ent:EntIndex()
+
 	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
 	if self.isHacking then return end
 	if not IsValid(ent) then return end
@@ -153,12 +155,17 @@ function SWEP:PrimaryAttack()
 		self.startHack = CurTime()
 		self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
 		self:GetOwner():SetNWInt("endHack", self.endHack)
+
+		timer.Create(timeridentity, confighdevice.hdevice_hacking_timesound, self.endHack/confighdevice.hdevice_hacking_timesound, function()
+			self:EmitSound(confighdevice.hacking_sound, 100, 100)
+		end)
 	elseif isButtonExempt(ent:MapCreationID()) then
 		self:Failure(3)
+		timer.Remove(timeridentity)
 
 	elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
 		self:Failure(2)
-
+		timer.Remove(timeridentity)
 	end
 end
 
@@ -177,6 +184,7 @@ function SWEP:Think()
 	if self.isHacking and IsValid(ply) then
 		if not IsValid(tr.Entity) or tr.HitPos:Distance(ply:GetShootPos()) > 50 or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then
 			self:Failure(1)
+			timer.Remove(timeridentity)
 		elseif self.endHack <= CurTime() then
 			self:Success(tr.Entity)
 		end

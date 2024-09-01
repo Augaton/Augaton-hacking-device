@@ -35,6 +35,22 @@ MODULE.menu = {
 				default = 5,
 				decimals = 0,
 			},
+			{
+			    type = "Number",
+				name = "Sound delay time",
+				id = "hdevice_hacking_timesound",
+				desc = "Time between hacking sound",
+				default = 5,
+				decimals = 0,
+			},
+			{
+				type = "String",
+				name = "Hacking Sound",
+				id = "hdevice_hacking_sound",
+				desc = "Sound that's play when hacking",
+				default = "buttons/blip2.wav",
+			},
+
 			--  translations
             
 			"Translations Messages",
