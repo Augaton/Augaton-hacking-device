@@ -1,7 +1,7 @@
 local MODULE = {
 	name = "Hacking Device",
 	author = "Augaton",
-	version = "1.1.1",
+	version = "1.1.2",
 	description = [[Control what the CI do with their Hacking Device.]],
 	icon = "icon16/key.png",
 	version_url = "https://raw.githubusercontent.com/augaton/scp-hacking-device-reloaded/main/lua/guthscp/modules/hdevicereloaded/main.lua",
@@ -35,6 +35,15 @@ MODULE.menu = {
 				default = 5,
 				decimals = 0,
 			},
+
+			"Hacking Sound",
+			{
+				type = "Bool",
+				name = "Hacking Sound",
+				id = "hacking_sound_bool",
+				desc = "Should the hacking have a sound when used ?",
+				default = true,
+			},
 			{
 			    type = "Number",
 				name = "Sound delay time",
@@ -54,6 +63,13 @@ MODULE.menu = {
 			--  translations
             
 			"Translations Messages",
+			{
+				type = "String",
+				name = "Name",
+				id = "weapon_name",
+				desc = "Name your hacking device whatever you want",
+				default = "SCP - Hacking Device",
+			},
 			{
 				type = "String",
 				name = "Hack Start",

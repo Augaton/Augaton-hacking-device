@@ -1,4 +1,7 @@
-SWEP.PrintName			    = "SCP - Hacking Device"
+local hdevicereloaded = guthscp.modules.hdevicereloaded
+local confighdevice = guthscp.configs.hdevicereloaded
+
+SWEP.PrintName			    = confighdevice.weapon_name
 SWEP.Category				= "GuthSCP"
 SWEP.Author			        = "Augaton & Guthen"
 SWEP.Instructions		    = "Press Left Mouse Button to hack nearest doors."
@@ -75,12 +78,11 @@ SWEP.WElements = {
 		bodygroup = {}
 	}
 }
+
 SWEP.ViewModelBoneMods = {
 	["ValveBiped.Grenade_body"] = { scale = Vector( 0.009, 0.009, 0.009 ), pos = Vector( 0, 0, 0 ), angle = Angle( 0, 0, 0 ) }
 }
 
-local hdevicereloaded = guthscp.modules.hdevicereloaded
-local confighdevice = guthscp.configs.hdevicereloaded
 local hackingdevice_hack_time = confighdevice.hdevice_hack_time
 local hackingdevice_hack_max = confighdevice.hdevice_hack_max
 
@@ -152,13 +154,17 @@ function SWEP:PrimaryAttack()
 		
 		self.isHacking = true
 		self:GetOwner():SetNWBool("isHacking", true)
+
 		self.startHack = CurTime()
 		self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
 		self:GetOwner():SetNWInt("endHack", self.endHack)
 
-		timer.Create(timeridentity, confighdevice.hdevice_hacking_timesound, self.endHack/confighdevice.hdevice_hacking_timesound, function()
-			self:EmitSound(confighdevice.hacking_sound, 100, 100)
-		end)
+		if confighdevice.hacking_sound_bool then
+			timer.Create(timeridentity, confighdevice.hdevice_hacking_timesound, self.endHack/confighdevice.hdevice_hacking_timesound, function()
+				self:EmitSound(confighdevice.hdevice_hacking_sound, 100, 100)
+			end)
+		end
+
 	elseif isButtonExempt(ent:MapCreationID()) then
 		self:Failure(3)
 		timer.Remove(timeridentity)
@@ -230,6 +236,7 @@ function SWEP:DrawHUD()
 			time = equation,
 		}
 		)
+		
 		if level ~= 0 then
 			draw.SimpleText( hud_time_estimate , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 		end
@@ -247,7 +254,6 @@ function SWEP:DrawHUD()
 			local percent = (ply:GetNWInt("endHack") - CurTime()) / equation * 100
 
 			if percent < 0 then percent = 0 end
-
 			draw.SimpleText( math.Round(percent, 1)  .. "%", "ChatFont", ScrW() / 2, ScrH() / 2 + 50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
