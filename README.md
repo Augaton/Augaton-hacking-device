@@ -14,6 +14,8 @@ This addon is available on the Workshop just [here](https://steamcommunity.com/s
 + `hdevice_block_button` (client, need to be a superamdin): block a button from hacking **that persist even after a restart**
 + `hdevice_unblock_button` (client, need to be a superamdin also): unblock a button from hacking
 
+or use the **TOOL**
+
 ## Legal Terms
 This addon is licensed under [Creative Commons Sharealike 3.0](https://creativecommons.org/licenses/by-sa/3.0/) and is based on content of [SCP Foundation](http://scp-wiki.wikidot.com/)
 
