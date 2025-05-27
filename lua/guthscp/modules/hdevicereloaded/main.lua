@@ -135,6 +135,14 @@ MODULE.menu = {
 				desc = "Text shown to the player that show the estimated time that the hack take. Available arguments: '{time}'",
 				default = "Estimated Hack Time: {time}s",
 			},
+
+			{
+				type = "String",
+				name = "HUD Hacking",
+				id = "translation_hacking_hud",
+				desc = "Text shown to the player when hacking the keypad",
+				default = "HACKING IN PROGRESS...",
+			},
             
 		},
 	},

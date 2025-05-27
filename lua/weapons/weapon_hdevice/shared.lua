@@ -242,21 +242,42 @@ function SWEP:DrawHUD()
 			draw.SimpleText( hud_time_estimate , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
 		end
 
-		if ply:GetNWBool("isHacking") then
-			surface.SetDrawColor( 255, 255, 255, 128 )
-			surface.DrawOutlinedRect( ScrW()/2-50, ScrH()/2+40, 100, 20, 1.5 )
 
-			surface.SetDrawColor(0,175,0,255)
-			surface.DrawRect(ScrW() / 2-50, ScrH() / 2+40, ((self:GetOwner():GetNWInt("endHack")-CurTime())/(hackingdevice_hack_time*level))*100, 20)
-			
-			surface.SetDrawColor( 175, 255, 0, 50 )
-			surface.DrawOutlinedRect( ScrW() / 2-50, ScrH()/2+40, 100, 20, 10 )
+		// Partie Hacking
 
-			local percent = (ply:GetNWInt("endHack") - CurTime()) / equation * 100
+		if not IsValid(ply) or not ply:GetNWBool("isHacking") then return end
 
-			if percent < 0 then percent = 0 end
-			draw.SimpleText( math.Round(percent, 1)  .. "%", "ChatFont", ScrW() / 2, ScrH() / 2 + 50, Color( 95, 235, 95 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-		end
+		local scrW, scrH = ScrW(), ScrH()
+		local boxW, boxH = 200, 30
+		local x, y = scrW / 2 - boxW / 2, scrH / 2.2
+		local endTime = ply:GetNWInt("endHack") or 0
+		local timeLeft = math.max(0, endTime - CurTime())
+
+		local totalTime = hackingdevice_hack_time * (level or 1)
+		local progress = math.Clamp(1 - (timeLeft / totalTime), 0, 1)
+		local percent = math.Round(progress * 100, 1)
+
+		// Contour externe néon
+		surface.SetDrawColor(0, 255, 100, 60)
+		surface.DrawOutlinedRect(x - 3, y - 3, boxW + 6, boxH + 6, 4)
+
+		// Fond
+		surface.SetDrawColor(10, 10, 10, 200)
+		surface.DrawRect(x, y, boxW, boxH)
+
+		// Barre de progression
+		surface.SetDrawColor(0, 255, 100, 220)
+		surface.DrawRect(x, y, boxW * progress, boxH)
+
+		// Contour interne fin
+		surface.SetDrawColor(0, 255, 100, 90)
+		surface.DrawOutlinedRect(x, y, boxW, boxH, 1.5)
+
+		// Texte centré
+		draw.SimpleText(percent .. "%", "DermaLarge", scrW / 2, y + boxH / 2, Color(100, 255, 100, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+
+		// Texte en haut
+		draw.SimpleText(confighdevice.translation_hacking_hud, "Trebuchet24", scrW / 2, y - 35, Color(0, 255, 150, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	end
 	
 end
