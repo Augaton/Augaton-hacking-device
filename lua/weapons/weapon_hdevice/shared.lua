@@ -193,6 +193,7 @@ function SWEP:Think()
 			timer.Remove(timeridentity)
 		elseif self.endHack <= CurTime() then
 			self:Success(tr.Entity)
+			timer.Remove(timeridentity)
 		end
 	else
 		self.startHack = 0
