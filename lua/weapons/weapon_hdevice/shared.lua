@@ -277,7 +277,7 @@ function SWEP:DrawHUD()
 		draw.SimpleText(percent .. "%", "DermaLarge", scrW / 2, y + boxH / 2, Color(100, 255, 100, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 
 		// Texte en haut
-		draw.SimpleText(confighdevice.translation_hacking_hud, "Trebuchet24", scrW / 2, y - 35, Color(0, 255, 150, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(confighdevice.translation_hacking_hud, "Trebuchet24", scrW / 2, y - 25, Color(0, 255, 150, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	end
 	
 end
@@ -751,5 +751,13 @@ if CLIENT then
 		
 	end
 	
+end
+
+// Icon
+
+if CLIENT then
+    SWEP.WepSelectIcon = surface.GetTextureID("entities/weapon_hdevice.png")
+    SWEP.BounceWeaponIcon = false -- désactive l'effet de rebond
+    killicon.Add("weapon_hdevice", "entities/weapon_hdevice.png", Color(255, 255, 255, 255))
 end
 
