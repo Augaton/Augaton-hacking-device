@@ -138,6 +138,9 @@ function SWEP:PrimaryAttack()
 	if not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then return end -- No keycard table
 	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
 
+	hackingdevice_hack_time = confighdevice.hdevice_hack_time
+	hackingdevice_hack_max = confighdevice.hdevice_hack_max
+
 	timeridentity = "Hackingsound: "..ent:EntIndex()
 
 	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
@@ -212,6 +215,9 @@ function SWEP:DrawHUD()
 	local trg = ply:GetEyeTrace().Entity
 	local tr = self:GetOwner():GetEyeTrace()
 
+	hackingdevice_hack_time = confighdevice.hdevice_hack_time
+	hackingdevice_hack_max = confighdevice.hdevice_hack_max
+
 	if not IsValid( trg ) then return end
 	if not newGuthSCPconfig.keycard_available_classes[ trg:GetClass() ] then return end
 	
@@ -274,7 +280,7 @@ function SWEP:DrawHUD()
 		surface.DrawOutlinedRect(x, y, boxW, boxH, 1.5)
 
 		// Texte centré
-		draw.SimpleText(percent .. "%", "DermaLarge", scrW / 2, y + boxH / 2, Color(100, 255, 100, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(percent .. "%", "DermaLarge", scrW / 2, y + boxH / 2, Color(221, 4, 4), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 
 		// Texte en haut
 		draw.SimpleText(confighdevice.translation_hacking_hud, "Trebuchet24", scrW / 2, y - 25, Color(0, 255, 150, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
