@@ -1,7 +1,7 @@
 local MODULE = {
 	name = "Hacking Device",
 	author = "Augaton",
-	version = "1.3.0",
+	version = "1.3.1",
 	description = [[Control what the CI do with their Hacking Device.]],
 	icon = "icon16/key.png",
 	version_url = "https://raw.githubusercontent.com/augaton/scp-hacking-device-reloaded/main/lua/guthscp/modules/hdevicereloaded/main.lua",
