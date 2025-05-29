@@ -27,61 +27,41 @@ SWEP.SlotPos			    = 2
 SWEP.DrawAmmo			    = false
 SWEP.DrawCrosshair		    = true
 
-SWEP.ViewModel			    = "models/weapons/v_grenade.mdl"
-SWEP.WorldModel			    = "models/weapons/w_grenade.mdl"
-
 SWEP.ShouldDropOnDie 		= false
-
-SWEP.HoldType 				= "slam"
-
-SWEP.UseHands 				= false
-SWEP.ShowViewModel 			= false
-SWEP.ShowWorldModel 		= false
 
 SWEP.GuthSCPLVL       		= 0 -- Starting with 0 so player can't open doors without hacking and let keycard system asociate this SWEP with keycard
 
---  swep construction kit
-local model = "models/props/hdevice/hdevice.mdl"
-SWEP.VElements = {
-	["keycard"] = {
-		type = "Model",
-		model = model,
-		bone = "ValveBiped.Bip01_R_Finger0",
-		rel = "",
+// Keycard Modification
 
-		pos = Vector( 4, -1, -0.519 ),
-		angle = Angle( -8.183, -10.52, -99.351 ),
-		size = Vector( 0.625, 0.625, 0.625 ),
-
-		color = Color( 255, 255, 255, 255 ),
-		surpresslightning = false,
-		material = "",
-		skin = 4,
-		bodygroup = {}
-	}
-}
-SWEP.WElements = {
-	["keycard"] = {
-		type = "Model",
-		model = model,
-		bone = "ValveBiped.Bip01_R_Hand",
-		rel = "",
-
-		pos = Vector( 4.5, 4, -1.558 ),
-		angle = Angle( -3.507, -92.338, -59.611 ),
-		size = Vector( 0.755, 0.755, 0.755 ),
-
-		color = Color( 255, 255, 255, 255 ),
-		surpresslightning = false,
-		material = "",
-		skin = 4,
-		bodygroup = {}
-	}
-}
-
+SWEP.HoldType = "slam"
+SWEP.ViewModelFOV = 70
+SWEP.ViewModelFlip = false
+SWEP.UseHands = true
+SWEP.ViewModel = "models/weapons/c_slam.mdl"
+SWEP.WorldModel = "models/weapons/w_slam.mdl"
+SWEP.ShowViewModel = true
+SWEP.ShowWorldModel = true
 SWEP.ViewModelBoneMods = {
-	["ValveBiped.Grenade_body"] = { scale = Vector( 0.009, 0.009, 0.009 ), pos = Vector( 0, 0, 0 ), angle = Angle( 0, 0, 0 ) }
+    ["ValveBiped.Bip01_R_Finger41"] = { scale = Vector(1, 1, 1), pos = Vector(0, 0, 0), angle = Angle(0, 76.401, 0) },
+    ["ValveBiped.Bip01_R_Finger4"] = { scale = Vector(1, 1, 1), pos = Vector(0, 0, 0), angle = Angle(1.445, 6.422, 0) },
+    ["ValveBiped.Bip01_R_Forearm"] = { scale = Vector(1, 1, 1), pos = Vector(1.062, -0.332, 2.141), angle = Angle(0.365, 0, 0) },
+    ["Detonator"] = { scale = Vector(0.009, 0.009, 0.009), pos = Vector(0, 0, 0), angle = Angle(0, 0, 0) },
+    ["ValveBiped.Bip01_L_Hand"] = { scale = Vector(1, 1, 1), pos = Vector(0, 0, 0), angle = Angle(1.542, 3.132, -36.667) },
+    ["ValveBiped.Bip01_L_Forearm"] = { scale = Vector(1, 1, 1), pos = Vector(-0.732, -0.028, -0.242), angle = Angle(-0.127, -0.856, 1.082) },
+    ["ValveBiped.Bip01_R_UpperArm"] = { scale = Vector(1, 1, 1), pos = Vector(-1.852, -0.48, 3.42), angle = Angle(0, 0, 0) },
+    ["Slam_base"] = { scale = Vector(0.009, 0.009, 0.009), pos = Vector(0, 0, 0), angle = Angle(0, 0, 0) },
+    ["ValveBiped.Bip01_R_Hand"] = { scale = Vector(1, 1, 1), pos = Vector(0, 0, 0), angle = Angle(27.715, 40.37, -3.425) }
 }
+
+SWEP.VElements = {
+    ["CIHD"] = { type = "Model", model = "models/arsen/CIHackingDevice.mdl", bone = "ValveBiped.Bip01_L_Hand", rel = "", pos = Vector(4.903, 6.736, 1.467), angle = Angle(36.397, -176.864, 1.268), size = Vector(2, 2, 2), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
+}
+
+SWEP.WElements = {
+	["CIHD"] = { type = "Model", model = "models/arsen/CIHackingDevice.mdl", bone = "ValveBiped.Bip01_R_Hand", rel = "", pos = Vector(3.653, 6.964, -1.315), angle = Angle(-123.943, 6.752, 5.219), size = Vector(3.22, 2.378, 1.988), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
+}
+
+// End (Thanks Arsen)
 
 local hackingdevice_hack_time = confighdevice.hdevice_hack_time
 local hackingdevice_hack_max = confighdevice.hdevice_hack_max
@@ -294,43 +274,55 @@ end
 
 function SWEP:Initialize()
 
-	if CLIENT then
-	
-		// Create a new table for every weapon instance
-		self.VElements = table.FullCopy( self.VElements )
-		self.WElements = table.FullCopy( self.WElements )
-		self.ViewModelBoneMods = table.FullCopy( self.ViewModelBoneMods )
+    self:SetHoldType(self.HoldType)
 
-		self:CreateModels(self.VElements) // create viewmodels
-		self:CreateModels(self.WElements) // create worldmodels
-		
-		// init view model bone build function
-		if IsValid(self:GetOwner()) then
-			local vm = self:GetOwner():GetViewModel()
-			if IsValid(vm) then
-				self:ResetBonePositions(vm)
-				
-				// Init viewmodel visibility
-				if (self.ShowViewModel == nil or self.ShowViewModel) then
-					vm:SetColor(Color(255,255,255,255))
-				else
-					// we set the alpha to 1 instead of 0 because else ViewModelDrawn stops being called
-					vm:SetColor(Color(255,255,255,1))
-					// ^ stopped working in GMod 13 because you have to do Entity:SetRenderMode(1) for translucency to kick in
-					// however for some reason the view model resets to render mode 0 every frame so we just apply a debug material to prevent it from drawing
-					vm:SetMaterial("Debug/hsv")			
-				end
-			end
-		end
-		
-	end
+    -- Ustawienie rąk zależnie od modelu gracza
+    if SERVER then
+        local ply = self.Owner
+        if IsValid(ply) then
+            local hands = ply:GetHands()
+            if IsValid(hands) then
+                local handModel = player_manager.TranslatePlayerHands(ply:GetModel())
+                if handModel then
+                    hands:SetModel(handModel.model)
+                    hands:SetSkin(handModel.skin)
+                    hands:SetBodyGroups(handModel.body)
+                end
+            end
+        end
+    end
 
+    if CLIENT then
+        -- Tworzenie kopii tablicy dla każdego przypadku broni
+        self.VElements = table.FullCopy(self.VElements)
+        self.WElements = table.FullCopy(self.WElements)
+        self.ViewModelBoneMods = table.FullCopy(self.ViewModelBoneMods)
+
+        self:CreateModels(self.VElements) -- Tworzenie modeli viewmodelu
+        self:CreateModels(self.WElements) -- Tworzenie modeli worldmodelu
+
+        -- Inicjalizacja połączeń modelu viewmodel
+        if IsValid(self.Owner) then
+            local vm = self.Owner:GetViewModel()
+            if IsValid(vm) then
+                self:ResetBonePositions(vm)
+                
+                -- Ustawienia widoczności modelu
+                if (self.ShowViewModel == nil or self.ShowViewModel) then
+                    vm:SetColor(Color(255, 255, 255, 255))
+                else
+                    vm:SetColor(Color(255, 255, 255, 1))
+                    vm:SetMaterial("Debug/hsv")
+                end
+            end
+        end
+    end
 end
 
 function SWEP:Holster()
 	
-	if CLIENT and IsValid(self:GetOwner()) then
-		local vm = self:GetOwner():GetViewModel()
+	if CLIENT and IsValid(self.Owner) then
+		local vm = self.Owner:GetViewModel()
 		if IsValid(vm) then
 			self:ResetBonePositions(vm)
 		end
@@ -348,7 +340,7 @@ if CLIENT then
 	SWEP.vRenderOrder = nil
 	function SWEP:ViewModelDrawn()
 		
-		local vm = self:GetOwner():GetViewModel()
+		local vm = self.Owner:GetViewModel()
 		if !IsValid(vm) then return end
 		
 		if (!self.VElements) then return end
@@ -409,9 +401,9 @@ if CLIENT then
 				end
 				
 				if (v.bodygroup) then
-					for bodygroup_key, bodygroup_value in pairs( v.bodygroup ) do
-						if (model:GetBodygroup(bodygroup_key) != v) then
-							model:SetBodygroup(bodygroup_key, v)
+					for k, v in pairs( v.bodygroup ) do
+						if (model:GetBodygroup(k) != v) then
+							model:SetBodygroup(k, v)
 						end
 					end
 				end
@@ -420,8 +412,8 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				render.SetColorModulation(v.color.r / 255, v.color.g / 255, v.color.b / 255)
-				render.SetBlend(v.color.a / 255)
+				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
+				render.SetBlend(v.color.a/255)
 				model:DrawModel()
 				render.SetBlend(1)
 				render.SetColorModulation(1, 1, 1)
@@ -476,8 +468,8 @@ if CLIENT then
 
 		end
 		
-		if (IsValid(self:GetOwner())) then
-			bone_ent = self:GetOwner()
+		if (IsValid(self.Owner)) then
+			bone_ent = self.Owner
 		else
 			// when the weapon is dropped
 			bone_ent = self
@@ -537,8 +529,8 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				render.SetColorModulation(v.color.r / 255, v.color.g / 255, v.color.b / 255)
-				render.SetBlend(v.color.a / 255)
+				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
+				render.SetBlend(v.color.a/255)
 				model:DrawModel()
 				render.SetBlend(1)
 				render.SetColorModulation(1, 1, 1)
@@ -602,8 +594,8 @@ if CLIENT then
 				pos, ang = m:GetTranslation(), m:GetAngles()
 			end
 			
-			if (IsValid(self:GetOwner()) and self:GetOwner():IsPlayer() and 
-				ent == self:GetOwner():GetViewModel() and self.ViewModelFlip) then
+			if (IsValid(self.Owner) and self.Owner:IsPlayer() and 
+				ent == self.Owner:GetViewModel() and self.ViewModelFlip) then
 				ang.r = -ang.r // Fixes mirrored models
 			end
 		
@@ -632,18 +624,18 @@ if CLIENT then
 				end
 				
 			elseif (v.type == "Sprite" and v.sprite and v.sprite != "" and (!v.spriteMaterial or v.createdSprite != v.sprite) 
-				and file.Exists ("materials/" .. v.sprite .. ".vmt", "GAME")) then
+				and file.Exists ("materials/"..v.sprite..".vmt", "GAME")) then
 				
-				local name = v.sprite .. "-"
+				local name = v.sprite.."-"
 				local params = { ["$basetexture"] = v.sprite }
 				// make sure we create a unique name based on the selected options
 				local tocheck = { "nocull", "additive", "vertexalpha", "vertexcolor", "ignorez" }
 				for i, j in pairs( tocheck ) do
 					if (v[j]) then
-						params["$" .. j] = 1
-						name = name .. "1"
+						params["$"..j] = 1
+						name = name.."1"
 					else
-						name = name .. "0"
+						name = name.."0"
 					end
 				end
 
@@ -669,7 +661,7 @@ if CLIENT then
 			local loopthrough = self.ViewModelBoneMods
 			if (!hasGarryFixedBoneScalingYet) then
 				allbones = {}
-				for i = 0, vm:GetBoneCount() do
+				for i=0, vm:GetBoneCount() do
 					local bonename = vm:GetBoneName(i)
 					if (self.ViewModelBoneMods[bonename]) then 
 						allbones[bonename] = self.ViewModelBoneMods[bonename]
@@ -696,7 +688,7 @@ if CLIENT then
 				local ms = Vector(1,1,1)
 				if (!hasGarryFixedBoneScalingYet) then
 					local cur = vm:GetBoneParent(bone)
-					while (cur >= 0) do
+					while(cur >= 0) do
 						local pscale = loopthrough[vm:GetBoneName(cur)].scale
 						ms = ms * pscale
 						cur = vm:GetBoneParent(cur)
@@ -725,7 +717,7 @@ if CLIENT then
 	function SWEP:ResetBonePositions(vm)
 		
 		if (!vm:GetBoneCount()) then return end
-		for i = 0, vm:GetBoneCount() do
+		for i=0, vm:GetBoneCount() do
 			vm:ManipulateBoneScale( i, Vector(1, 1, 1) )
 			vm:ManipulateBoneAngles( i, Angle(0, 0, 0) )
 			vm:ManipulateBonePosition( i, Vector(0, 0, 0) )
@@ -762,8 +754,7 @@ end
 // Icon
 
 if CLIENT then
-    SWEP.WepSelectIcon = surface.GetTextureID("entities/weapon_hdevice.png")
+   	SWEP.WepSelectIcon = surface.GetTextureID("vgui/weapons/arsen/CIHD_icon")
     SWEP.BounceWeaponIcon = false -- désactive l'effet de rebond
-    killicon.Add("weapon_hdevice", "entities/weapon_hdevice.png", Color(255, 255, 255, 255))
+    killicon.Add("weapon_hdevice", "vgui/weapons/arsen/CIHD_icon", Color(255, 255, 255, 255))
 end
-

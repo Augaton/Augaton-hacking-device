@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "arsen/CIHackingDevice"
+	"$normalmap" "arsen/CIHackingDevice_n"
+	"$surfaceprop" "Computer"
+}
