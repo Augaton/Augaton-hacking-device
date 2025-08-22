@@ -1,4 +1,4 @@
-# [Augaton] scp-hacking-device-reloaded
+# [Augaton] SCP Hacking-Device Reloaded
 
 ## Steam Workshop
 ![Steam Views](https://img.shields.io/steam/views/3302753364?color=red&style=for-the-badge)
