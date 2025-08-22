@@ -1,3 +1,8 @@
+if not guthscp then
+	error( "HackingDevice - fatal error! https://github.com/Guthen/guthscpbase must be installed on the server!" )
+	return
+end
+
 local hdevicereloaded = guthscp.modules.hdevicereloaded
 local confighdevice = guthscp.configs.hdevicereloaded
 
