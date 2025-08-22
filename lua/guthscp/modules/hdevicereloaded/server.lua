@@ -1,10 +1,5 @@
 local exceptionButtonID = exceptionButtonID or
 {
-	-- [2346] = true,
-	-- [3510] = true,
-	-- [3762] = true,
-	-- [1781] = true,
-	-- [1783] = true,
 }
 
 local hdevicereloaded = guthscp.modules.hdevicereloaded
