@@ -5,6 +5,8 @@ end
 
 local hdevicereloaded = guthscp.modules.hdevicereloaded
 local confighdevice = guthscp.configs.hdevicereloaded
+local newGuthSCP = guthscp.modules.guthscpkeycard
+local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 
 SWEP.PrintName			    = confighdevice.weapon_name
 SWEP.Category				= "GuthSCP"
@@ -36,7 +38,7 @@ SWEP.ShouldDropOnDie 		= false
 
 SWEP.GuthSCPLVL       		= 0 -- Starting with 0 so player can't open doors without hacking and let keycard system asociate this SWEP with keycard
 
-// Keycard Modification
+-- Keycard Modification
 
 SWEP.HoldType = "slam"
 SWEP.ViewModelFOV = 70
@@ -66,13 +68,19 @@ SWEP.WElements = {
 	["CIHD"] = { type = "Model", model = "models/arsen/CIHackingDevice.mdl", bone = "ValveBiped.Bip01_R_Hand", rel = "", pos = Vector(3.653, 6.964, -1.315), angle = Angle(-123.943, 6.752, 5.219), size = Vector(3.22, 2.378, 1.988), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
 }
 
-// End (Thanks Arsen)
+-- End (Thanks Arsen)
+
+-- Max distance Hack
+local HACK_DISTANCE = 65 
+
+function SWEP:SetupDataTables()
+    self:NetworkVar("Bool", 0, "IsHacking")
+    self:NetworkVar("Float", 0, "HackEndTime")
+    self:NetworkVar("Entity", 0, "TargetEnt")
+end
 
 local hackingdevice_hack_time = confighdevice.hdevice_hack_time
 local hackingdevice_hack_max = confighdevice.hdevice_hack_max
-
-local newGuthSCP = guthscp.modules.guthscpkeycard
-local newGuthSCPconfig = guthscp.configs.guthscpkeycard
 
 function SWEP:Success(ent)
 	self.isHacking = false
@@ -110,57 +118,44 @@ local function isButtonExempt(id)
 	return hdevicereloaded.exceptionButtonID[game.GetMap()][id]
 end
 
+
 function SWEP:PrimaryAttack()
+    self:SetNextPrimaryFire(CurTime() + 0.5)
 
-	self.nextFire = 0
+    local owner = self:GetOwner()
+    local tr = owner:GetEyeTrace()
+    local ent = tr.Entity
 
-    local tr = self:GetOwner():GetEyeTrace()
-	local ent = tr.Entity
-	local trLVL = newGuthSCP.get_entity_level(ent)
+    if not IsValid(ent) or tr.StartPos:DistToSqr(tr.HitPos) > (HACK_DISTANCE * HACK_DISTANCE) then return end
+    if not newGuthSCPconfig.keycard_available_classes[ent:GetClass()] then return end
+    
+    local trLVL = newGuthSCP.get_entity_level(ent)
+    local hackMax = confighdevice.hdevice_hack_max
+    local isExempt = hdevicereloaded.exceptionButtonID and hdevicereloaded.exceptionButtonID[game.GetMap()] and hdevicereloaded.exceptionButtonID[game.GetMap()][ent:MapCreationID()]
 
-	-- check if everything ok
-	if not newGuthSCP then return end -- If no Base Guthen Keycard sys = end
-	if not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then return end -- No keycard table
-	if not hdevicereloaded.exceptionButtonID then return end -- No buttons file
+    if trLVL < 0 then 
+        if SERVER then guthscp.player_message(owner, confighdevice.translation_dont_need) end 
+        return 
+    end
 
-	hackingdevice_hack_time = confighdevice.hdevice_hack_time
-	hackingdevice_hack_max = confighdevice.hdevice_hack_max
+    if isExempt then
+        self:Failure(3)
+        return
+    end
 
-	timeridentity = "Hackingsound: "..ent:EntIndex()
+    if trLVL > hackMax then
+        self:Failure(2)
+        return
+    end
 
-	if trLVL < 0 then if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_dont_need ) end return end
-	if self.isHacking then return end
-	if not IsValid(ent) then return end
-	if tr.HitPos:Distance(self:GetOwner():GetShootPos()) > 50 then return end
-	if trLVL == 0 and not isButtonExempt(ent:MapCreationID()) then
-		self:Open(ent)
+    if trLVL == 0 then
+        self:Open(ent)
+        return
+    end
 
-	elseif trLVL <= hackingdevice_hack_max and not isButtonExempt(ent:MapCreationID()) then
-		self:GetOwner():EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100, 1, CHAN_AUTO)
-
-		if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_start ) end
-		
-		self.isHacking = true
-		self:GetOwner():SetNWBool("isHacking", true)
-
-		self.startHack = CurTime()
-		self.endHack = CurTime() + newGuthSCP.get_entity_level(ent) * hackingdevice_hack_time
-		self:GetOwner():SetNWInt("endHack", self.endHack)
-
-		if confighdevice.hacking_sound_bool then
-			timer.Create(timeridentity, confighdevice.hdevice_hacking_timesound, self.endHack/confighdevice.hdevice_hacking_timesound, function()
-				self:EmitSound(confighdevice.hdevice_hacking_sound, 100, 100)
-			end)
-		end
-
-	elseif isButtonExempt(ent:MapCreationID()) then
-		self:Failure(3)
-		timer.Remove(timeridentity)
-
-	elseif IsValid(tr.Entity) and tr.HitPos:Distance(self:GetOwner():GetShootPos()) < 50 and trLVL ~= 0 and trLVL > hackingdevice_hack_max then
-		self:Failure(2)
-		timer.Remove(timeridentity)
-	end
+    if not self:GetIsHacking() then
+        self:StartHacking(ent, trLVL)
+    end
 end
 
 function SWEP:SecondaryAttack() end
