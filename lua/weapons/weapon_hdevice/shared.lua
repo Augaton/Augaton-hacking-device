@@ -191,7 +191,7 @@ function SWEP:Think()
 
     local owner = self:GetOwner()
     local tr = owner:GetEyeTrace()
-	
+
     if not IsValid(tr.Entity) or tr.Entity ~= self:GetTargetEnt() or tr.StartPos:DistToSqr(tr.HitPos) > (HACK_DISTANCE * HACK_DISTANCE) then
         self:Failure(1)
         return
@@ -203,86 +203,37 @@ function SWEP:Think()
 end
 
 function SWEP:DrawHUD()
-	
-    local ply = self:GetOwner()
-	if not IsValid( ply ) or not ply:Alive() then return end
+    local owner = self:GetOwner()
+    local ent = owner:GetEyeTrace().Entity
+    if not IsValid(ent) or not newGuthSCPconfig.keycard_available_classes[ent:GetClass()] then return end
 
-	local trg = ply:GetEyeTrace().Entity
-	local tr = self:GetOwner():GetEyeTrace()
+    local level = newGuthSCP.get_entity_level(ent)
+    local scrW, scrH = ScrW(), ScrH()
 
-	hackingdevice_hack_time = confighdevice.hdevice_hack_time
-	hackingdevice_hack_max = confighdevice.hdevice_hack_max
+    -- Info de base sur la porte
+    if level then
+        local txt = (level < 0) and confighdevice.translation_dont_need_hud or "Niveau: " .. level
+        draw.SimpleText(txt, "DermaDefaultBold", scrW / 2 + 60, scrH / 2, color_white, TEXT_ALIGN_LEFT)
+    end
 
-	if not IsValid( trg ) then return end
-	if not newGuthSCPconfig.keycard_available_classes[ trg:GetClass() ] then return end
-	
-	local level = newGuthSCP.get_entity_level(trg)
+    -- Barre de hack
+    if self:GetIsHacking() then
+        local timeLeft = self:GetHackEndTime() - CurTime()
+        local totalTime = confighdevice.hdevice_hack_time * level
+        local progress = math.Clamp(1 - (timeLeft / totalTime), 0, 1)
 
-    if level and tr.HitPos:Distance(ply:GetShootPos()) < 50 then
+        local w, h = 250, 25
+        local x, y = (scrW - w) / 2, scrH * 0.6
 
-		if level < 0 then draw.SimpleText( confighdevice.translation_dont_need_hud, "ChatFont", ScrW() / 2 + 50, ScrH() / 2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER ) return end
-
-		local hud_door_level = guthscp.helpers.format_message(
-		confighdevice.translation_level_hud,
-		{
-			level = level,
-		}
-		)
-		draw.SimpleText( hud_door_level, "ChatFont", ScrW() / 2 + 50, ScrH() / 2, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-
-		local equation = level * hackingdevice_hack_time
-
-		local hud_time_estimate = guthscp.helpers.format_message(
-		confighdevice.translation_estimated_time_hud,
-		{
-			time = equation,
-		}
-		)
-		
-		if level ~= 0 then
-			draw.SimpleText( hud_time_estimate , "ChatFont", ScrW()/2+50, ScrH()/2+15, Color( 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-		end
-
-
-		// Partie Hacking
-
-		if not IsValid(ply) or not ply:GetNWBool("isHacking") then return end
-
-		local scrW, scrH = ScrW(), ScrH()
-		local boxW, boxH = 200, 30
-		local x, y = scrW / 2 - boxW / 2, scrH / 2.2
-		local endTime = ply:GetNWInt("endHack") or 0
-		local timeLeft = math.max(0, endTime - CurTime())
-
-		local totalTime = hackingdevice_hack_time * (level or 1)
-		local progress = math.Clamp(1 - (timeLeft / totalTime), 0, 1)
-		local percent = math.Round(progress * 100, 1)
-
-		// Contour externe néon
-		surface.SetDrawColor(0, 255, 100, 60)
-		surface.DrawOutlinedRect(x - 3, y - 3, boxW + 6, boxH + 6, 4)
-
-		// Fond
-		surface.SetDrawColor(10, 10, 10, 200)
-		surface.DrawRect(x, y, boxW, boxH)
-
-		// Barre de progression
-		surface.SetDrawColor(0, 255, 100, 220)
-		surface.DrawRect(x, y, boxW * progress, boxH)
-
-		// Contour interne fin
-		surface.SetDrawColor(0, 255, 100, 90)
-		surface.DrawOutlinedRect(x, y, boxW, boxH, 1.5)
-
-		// Texte centré
-		draw.SimpleText(percent .. "%", "DermaLarge", scrW / 2, y + boxH / 2, Color(221, 4, 4), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-
-		// Texte en haut
-		draw.SimpleText(confighdevice.translation_hacking_hud, "Trebuchet24", scrW / 2, y - 25, Color(0, 255, 150, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-	end
-	
+        -- Fond
+        draw.RoundedBox(4, x, y, w, h, Color(0, 0, 0, 200))
+        -- Remplissage (Neon Green)
+        draw.RoundedBox(4, x + 2, y + 2, (w - 4) * progress, h - 4, Color(0, 255, 127, 255))
+        
+        draw.SimpleText(math.Round(progress * 100) .. "%", "DermaDefaultBold", x + w/2, y + h/2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(confighdevice.translation_hacking_hud, "DermaDefaultBold", x + w/2, y - 15, Color(0, 255, 127), TEXT_ALIGN_CENTER)
+    end
 end
-
 --
 -- SWEP Construction Kit
 --
