@@ -82,34 +82,38 @@ end
 local hackingdevice_hack_time = confighdevice.hdevice_hack_time
 local hackingdevice_hack_max = confighdevice.hdevice_hack_max
 
-function SWEP:Success(ent)
-	self.isHacking = false
-	self:GetOwner():SetNWBool("isHacking", false)
-	if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_done ) end
-	ent:Use(self:GetOwner(), ent, 4, 1)
-	self:GetOwner():EmitSound("ambient/energy/spark3.wav", 65, 100, 1, CHAN_AUTO) -- Sounds exported from HL2
+function SWEP:StopHacking()
+    self:SetIsHacking(false)
+    self:SetTargetEnt(nil)
+    if SERVER then
+        timer.Remove("hdevice_sound_" .. self:EntIndex())
+    end
 end
 
+function SWEP:Success(ent)
+    self:StopHacking()
+    if SERVER then
+        guthscp.player_message(self:GetOwner(), confighdevice.translation_done)
+        ent:Use(self:GetOwner(), ent, 4, 1)
+        self:GetOwner():EmitSound("ambient/energy/spark3.wav", 65, 100)
+    end
+end
 function SWEP:Open(ent)
 	ent:Use(self:GetOwner(), ent, 4, 1)
 end
 
-function SWEP:Failure(fail) -- 1 = Moved mouse, moved too far, 2 = Hacking limited to certain LVL, else = Button blocked
-	self.isHacking = false
-	self:GetOwner():SetNWBool("isHacking", false)
-	if fail == 1 then
-		if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_failed ) end
-	elseif fail == 2 then
-	local max_text = guthscp.helpers.format_message(
-	confighdevice.translation_try_bigger_max,
-	{
-		level = hackingdevice_hack_max,
-	}
-	)
-		if SERVER then guthscp.player_message( self:GetOwner(), max_text ) end
-	else
-		if SERVER then guthscp.player_message( self:GetOwner(), confighdevice.translation_blocked ) end 
-	end
+function SWEP:Failure(reason)
+    self:StopHacking()
+    if SERVER then
+        local owner = self:GetOwner()
+        if reason == 1 then
+            guthscp.player_message(owner, confighdevice.translation_failed)
+        elseif reason == 2 then
+            guthscp.player_message(owner, guthscp.helpers.format_message(confighdevice.translation_try_bigger_max, {level = confighdevice.hdevice_hack_max}))
+        else
+            guthscp.player_message(owner, confighdevice.translation_blocked)
+        end
+    end
 end
 
 local function isButtonExempt(id)
