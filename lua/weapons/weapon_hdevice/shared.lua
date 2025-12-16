@@ -133,15 +133,18 @@ function SWEP:StartHacking(ent, level)
         guthscp.player_message(self:GetOwner(), confighdevice.translation_start)
         self:GetOwner():EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100)
         
-        -- Timer de son cyclique
-        local timerID = "hdevice_sound_" .. self:EntIndex()
-        timer.Create(timerID, confighdevice.hdevice_hacking_timesound, 0, function()
-            if not IsValid(self) or not self:GetIsHacking() then 
-                timer.Remove(timerID) 
-                return 
-            end
-            self:EmitSound(confighdevice.hdevice_hacking_sound, 75, 100)
-        end)
+		local timerID = "hdevice_sound_" .. self:EntIndex()
+		timer.Create(timerID, confighdevice.hdevice_hacking_timesound, 0, function()
+			if not IsValid(self) or not self:GetIsHacking() then 
+				timer.Remove(timerID) 
+				return 
+			end
+			
+			local target = self:GetTargetEnt()
+			if IsValid(target) then
+				target:EmitSound(confighdevice.hdevice_hacking_sound, 80, 100, 1, CHAN_AUTO)
+			end
+		end)
     end
 end
 
