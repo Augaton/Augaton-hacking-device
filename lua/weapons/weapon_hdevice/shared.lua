@@ -234,6 +234,7 @@ function SWEP:DrawHUD()
         draw.SimpleText(confighdevice.translation_hacking_hud, "DermaDefaultBold", x + w/2, y - 15, Color(0, 255, 127), TEXT_ALIGN_CENTER)
     end
 end
+
 --
 -- SWEP Construction Kit
 --
