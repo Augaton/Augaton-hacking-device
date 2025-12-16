@@ -187,30 +187,19 @@ end
 function SWEP:SecondaryAttack() end
 
 function SWEP:Think()
-    local tr = self:GetOwner():GetEyeTrace()
-	local ent = tr.Entity
-	local ply = self:GetOwner()
+    if not self:GetIsHacking() then return end
 
-    if not self.startHack then
-		self.startHack = 0
-		self.endHack = 0
-	end
-
-	if self.isHacking and IsValid(ply) then
-		if not IsValid(tr.Entity) or tr.HitPos:Distance(ply:GetShootPos()) > 50 or not newGuthSCPconfig.keycard_available_classes[ ent:GetClass() ] then
-			self:Failure(1)
-			timer.Remove(timeridentity)
-		elseif self.endHack <= CurTime() then
-			self:Success(tr.Entity)
-			timer.Remove(timeridentity)
-		end
-	else
-		self.startHack = 0
-		self.endHack = 0
-	end
+    local owner = self:GetOwner()
+    local tr = owner:GetEyeTrace()
 	
-	self:NextThink(CurTime())
-	return true
+    if not IsValid(tr.Entity) or tr.Entity ~= self:GetTargetEnt() or tr.StartPos:DistToSqr(tr.HitPos) > (HACK_DISTANCE * HACK_DISTANCE) then
+        self:Failure(1)
+        return
+    end
+
+    if CurTime() >= self:GetHackEndTime() then
+        self:Success(tr.Entity)
+    end
 end
 
 function SWEP:DrawHUD()
