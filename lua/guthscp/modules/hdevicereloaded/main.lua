@@ -171,20 +171,40 @@ MODULE.menu = {
 	},
 }
 
+local map_name = game.GetMap()
+-- On définit le chemin relatif pour le framework
+guthscp.modules.hdevicereloaded.relative_path = "hdevicereloaded/" .. map_name .. "/blockhdevice.txt"
+
+local old_path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
+local old_old_path = "guth_scp/hdevice_blocked_buttons.txt"
+
 function MODULE:init()
+    self.path = guthscp.modules.hdevicereloaded.relative_path
 
-	--  warn for old version
-	timer.Simple( 0, function()
-		if hook.GetTable()["PlayerInitialSpawn"] then
-			if hook.GetTable()["PlayerInitialSpawn"]["HDevice:GetIDs"] then
-				local text = "The old version of this addon is currently running on this server. Please, delete the '[SCP] Hacking Device by zgredinzyyy' addon to avoid any possible conflicts."
-				self:add_error( text )
-				self:error( text )
-			end
-		end
-	end )
+    if file.Exists( old_path, "DATA" ) then
+        guthscp.data.move_file( old_path, self.path )
+        self:info( "Migration (old .txt) effectuée pour " .. map_name )
+    end
 
-    MODULE:info("The Hacking Device has been loaded !")
+    if file.Exists( old_old_path, "DATA" ) and not file.Exists( "guthscp/" .. self.path, "DATA" ) then
+        local content = file.Read( old_old_path, "DATA" )
+        if content then
+            file.CreateDir( "guthscp/hdevicereloaded/" .. map_name )
+            file.Write( "guthscp/" .. self.path, content )
+            file.Rename( old_old_path, old_old_path .. ".bak" )
+            self:info( "Migration (old_old .txt) effectuée vers le format map." )
+        end
+    end
+
+    timer.Simple( 0, function()
+        if hook.GetTable()["PlayerInitialSpawn"] and hook.GetTable()["PlayerInitialSpawn"]["HDevice:GetIDs"] then
+            local text = "The old version of this addon is currently running on this server. Please, delete the '[SCP] Hacking Device by zgredinzyyy' addon to avoid any possible conflicts."
+            self:add_error( text )
+            self:error( text )
+        end
+    end )
+
+    self:info( "The Hacking Device has been loaded !" )
 end
 
 guthscp.module.hot_reload( "hdevicereloaded" )

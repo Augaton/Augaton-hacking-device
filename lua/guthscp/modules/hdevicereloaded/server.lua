@@ -1,11 +1,6 @@
 local hdevicereloaded = guthscp.modules.hdevicereloaded
 hdevicereloaded.exceptionButtonID = hdevicereloaded.exceptionButtonID or {}
-
--- On définit le chemin relatif (GuthSCPBase ajoutera "guthscp/" devant)
-local map_name = game.GetMap()
-local relative_path = "hdevicereloaded/" .. map_name .. "/blockhdevice.txt"
-local old_path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
-local old_old_path = ""
+local relative_path = guthscp.modules.hdevicereloaded.relative_path
 
 function hdevicereloaded.save_db()
     local data = hdevicereloaded.exceptionButtonID[map_name] or {}
