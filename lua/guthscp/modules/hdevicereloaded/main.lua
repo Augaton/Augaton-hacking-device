@@ -146,7 +146,7 @@ MODULE.menu = {
             
 		},
 	},
-	--  details
+	--  social
 	details = {
 		{
 			text = "CC-BY-SA",
@@ -172,8 +172,7 @@ MODULE.menu = {
 }
 
 local map_name = game.GetMap()
--- On définit le chemin relatif pour le framework
-guthscp.modules.hdevicereloaded.relative_path = "hdevicereloaded/" .. map_name .. "/blockhdevice.txt"
+MODULE.relative_path = "hdevicereloaded/" .. map_name .. "/blockhdevice.txt"
 
 local old_path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
 local old_old_path = "guth_scp/hdevice_blocked_buttons.txt"
