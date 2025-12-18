@@ -1,6 +1,7 @@
 local hdevicereloaded = guthscp.modules.hdevicereloaded
 hdevicereloaded.exceptionButtonID = hdevicereloaded.exceptionButtonID or {}
 local relative_path = guthscp.modules.hdevicereloaded.relative_path
+local map_name = guthscp.modules.hdevicereloaded.map_name
 
 function hdevicereloaded.save_db()
     local data = hdevicereloaded.exceptionButtonID[map_name] or {}

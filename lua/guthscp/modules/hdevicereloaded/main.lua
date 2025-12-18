@@ -171,10 +171,10 @@ MODULE.menu = {
 	},
 }
 
-local map_name = game.GetMap()
-MODULE.relative_path = "hdevicereloaded/" .. map_name .. "/blockhdevice.txt"
+MODULE.map_name = game.GetMap()
+MODULE.relative_path = "hdevicereloaded/" .. MODULE.map_name .. "/blockhdevice.txt"
 
-local old_path = "guthscp/hdevicereloaded/" .. map_name .. "/blockhdevice" .. map_name .. ".txt"
+local old_path = "guthscp/hdevicereloaded/" .. MODULE.map_name .. "/blockhdevice" .. MODULE.map_name .. ".txt"
 local old_old_path = "guth_scp/hdevice_blocked_buttons.txt"
 
 function MODULE:init()
@@ -182,13 +182,13 @@ function MODULE:init()
 
     if file.Exists( old_path, "DATA" ) then
         guthscp.data.move_file( old_path, self.path )
-        self:info( "Migration (old .txt) effectuée pour " .. map_name )
+        self:info( "Migration (old .txt) effectuée pour " .. self.map_name )
     end
 
     if file.Exists( old_old_path, "DATA" ) and not file.Exists( "guthscp/" .. self.path, "DATA" ) then
         local content = file.Read( old_old_path, "DATA" )
         if content then
-            file.CreateDir( "guthscp/hdevicereloaded/" .. map_name )
+            file.CreateDir( "guthscp/hdevicereloaded/" .. self.map_name )
             file.Write( "guthscp/" .. self.path, content )
             file.Rename( old_old_path, old_old_path .. ".bak" )
             self:info( "Migration (old_old .txt) effectuée vers le format map." )
