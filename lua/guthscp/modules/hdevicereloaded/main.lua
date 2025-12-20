@@ -60,6 +60,27 @@ MODULE.menu = {
 				default = "buttons/blip2.wav",
 			},
 
+			-- CHAOS !!
+
+			"RNG Chaos",
+            {
+                type = "Bool",
+                name = "Enable Random Time",
+                id = "hdevice_rng_enabled",
+                desc = "Should the hack time be randomized?",
+                default = false,
+            },
+            {
+                type = "Number",
+                name = "Randomness Percentage",
+                id = "hdevice_rng_percentage",
+                desc = "Variation percentage (e.g., 20 for +/- 20%).",
+                default = 20,
+                min = 0,
+                max = 100,
+                decimals = 0,
+            },
+
 			--  translations
             
 			"Translations Messages",
@@ -128,13 +149,13 @@ MODULE.menu = {
 				desc = "Text shown to the player that indicate the level of the door that looking. Available arguments: '{level}'",
 				default = "Keycard LVL Required: {level}",
 			},
-			{
-				type = "String",
-				name = "Estimated time",
-				id = "translation_estimated_time_hud",
-				desc = "Text shown to the player that show the estimated time that the hack take. Available arguments: '{time}'",
-				default = "Estimated Hack Time: {time}s",
-			},
+{
+                type = "String",
+                name = "Time Remaining HUD",
+                id = "translation_time_remaining_hud",
+                desc = "Text shown for time remaining. Available arguments: '{time}'",
+                default = "Temps restant : {time}s",
+            },
 
 			{
 				type = "String",
@@ -143,6 +164,7 @@ MODULE.menu = {
 				desc = "Text shown to the player when hacking the keypad",
 				default = "HACKING IN PROGRESS...",
 			},
+
             
 		},
 	},

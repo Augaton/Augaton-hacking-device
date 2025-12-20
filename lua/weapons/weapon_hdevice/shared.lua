@@ -124,14 +124,14 @@ local function isButtonExempt(id)
 end
 
 function SWEP:StartHacking(ent, level)
-local baseTime = confighdevice.hdevice_hack_time * level
-    local randomFactor = math.Rand(0.8, 1.2)
-    local hackTime = baseTime * randomFactor
+	local baseTime = confighdevice.hdevice_hack_time * level
+    local hackTime = baseTime
     
-    self:SetIsHacking(true)
-    self:SetTargetEnt(ent)
-    self:SetHackEndTime(CurTime() + hackTime)
-    self:SetCurrentHackDuration(hackTime)
+	if confighdevice.hdevice_rng_enabled then
+        local percent = (confighdevice.hdevice_rng_percentage or 20) / 100
+        local multiplier = math.Rand(1 - percent, 1 + percent)
+        hackTime = baseTime * multiplier
+    end
 
     if SERVER then
         guthscp.player_message(self:GetOwner(), confighdevice.translation_start)
@@ -210,35 +210,56 @@ function SWEP:Think()
 end
 
 function SWEP:DrawHUD()
-    local owner = self:GetOwner()
-    local ent = owner:GetEyeTrace().Entity
-    if not IsValid(ent) or not newGuthSCPconfig.keycard_available_classes[ent:GetClass()] then return end
-
-    local level = newGuthSCP.get_entity_level(ent)
     local scrW, scrH = ScrW(), ScrH()
+    local tr = self:GetOwner():GetEyeTrace()
+    local ent = tr.Entity
 
-    -- Info de base sur la porte
-    if level then
-        local txt = (level < 0) and confighdevice.translation_dont_need_hud or "Niveau: " .. level
-        draw.SimpleText(txt, "DermaDefaultBold", scrW / 2 + 60, scrH / 2, color_white, TEXT_ALIGN_LEFT)
-    end
-
-    -- Barre de hack
+    -- Si on est en train de hacker
     if self:GetIsHacking() then
-		local timeLeft = self:GetHackEndTime() - CurTime()
+        local timeLeft = math.max(0, self:GetHackEndTime() - CurTime())
         local totalTime = self:GetCurrentHackDuration()
+        
+        if totalTime <= 0 then totalTime = 1 end 
+        
         local progress = math.Clamp(1 - (timeLeft / totalTime), 0, 1)
 
         local w, h = 250, 25
         local x, y = (scrW - w) / 2, scrH * 0.6
 
-        -- Fond
+        -- Barre de progression
         draw.RoundedBox(4, x, y, w, h, Color(0, 0, 0, 200))
-        -- Remplissage (Neon Green)
         draw.RoundedBox(4, x + 2, y + 2, (w - 4) * progress, h - 4, Color(0, 255, 127, 255))
         
+        -- Pourcentage
         draw.SimpleText(math.Round(progress * 100) .. "%", "DermaDefaultBold", x + w/2, y + h/2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        
+        -- Texte d'état (Hacking in progress)
         draw.SimpleText(confighdevice.translation_hacking_hud, "DermaDefaultBold", x + w/2, y - 15, Color(0, 255, 127), TEXT_ALIGN_CENTER)
+
+        -- Temps restant personnalisé via config
+        local timeText = guthscp.helpers.format_message(confighdevice.translation_time_remaining_hud, {
+            time = string.format("%.1f", timeLeft)
+        })
+        draw.SimpleText(timeText, "DermaDefaultBold", x + w/2, y + h + 10, color_white, TEXT_ALIGN_CENTER)
+
+    -- Sinon, si on regarde une entité hackable (et qu'on ne hacke pas déjà)
+    elseif IsValid(ent) and (ent:GetClass() == "func_button" or ent:GetClass() == "guthscp_keycard_reader") then
+        
+        -- On récupère le niveau de la porte (ton code habituel ici)
+        local level = ent.GetKeycardLevel and ent:GetKeycardLevel() or ent.keycard_level or 0
+        
+        if level > 0 then
+            local x, y = scrW / 2, scrH * 0.6
+            
+            -- Affichage du niveau requis
+            local levelText = guthscp.helpers.format_message(confighdevice.translation_level_hud, { level = level })
+            draw.SimpleText(levelText, "DermaDefaultBold", x, y, color_white, TEXT_ALIGN_CENTER)
+
+            -- Affichage du temps estimé (basé sur le temps fixe de la config)
+            local estTime = confighdevice.hdevice_hack_time * level
+            local estText = guthscp.helpers.format_message(confighdevice.translation_estimated_time_hud, { time = estTime })
+            draw.SimpleText(estText, "DermaDefaultBold", x, y + 20, Color(200, 200, 200), TEXT_ALIGN_CENTER)
+        end
     end
 end
 
