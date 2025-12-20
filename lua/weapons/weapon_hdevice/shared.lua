@@ -76,6 +76,7 @@ local HACK_DISTANCE = 65
 function SWEP:SetupDataTables()
     self:NetworkVar("Bool", 0, "IsHacking")
     self:NetworkVar("Float", 0, "HackEndTime")
+    self:NetworkVar("Float", 1, "CurrentHackDuration")
     self:NetworkVar("Entity", 0, "TargetEnt")
 end
 
@@ -123,28 +124,31 @@ local function isButtonExempt(id)
 end
 
 function SWEP:StartHacking(ent, level)
-    local hackTime = confighdevice.hdevice_hack_time * level
+local baseTime = confighdevice.hdevice_hack_time * level
+    local randomFactor = math.Rand(0.8, 1.2)
+    local hackTime = baseTime * randomFactor
     
     self:SetIsHacking(true)
     self:SetTargetEnt(ent)
     self:SetHackEndTime(CurTime() + hackTime)
+    self:SetCurrentHackDuration(hackTime)
 
     if SERVER then
         guthscp.player_message(self:GetOwner(), confighdevice.translation_start)
         self:GetOwner():EmitSound("ambient/machines/keyboard1_clicks.wav", 60, 100)
         
-		local timerID = "hdevice_sound_" .. self:EntIndex()
-		timer.Create(timerID, confighdevice.hdevice_hacking_timesound, 0, function()
-			if not IsValid(self) or not self:GetIsHacking() then 
-				timer.Remove(timerID) 
-				return 
-			end
-			
-			local target = self:GetTargetEnt()
-			if IsValid(target) then
-				target:EmitSound(confighdevice.hdevice_hacking_sound, 80, 100, 1, CHAN_AUTO)
-			end
-		end)
+        local timerID = "hdevice_sound_" .. self:EntIndex()
+        timer.Create(timerID, confighdevice.hdevice_hacking_timesound, 0, function()
+            if not IsValid(self) or not self:GetIsHacking() then 
+                timer.Remove(timerID) 
+                return 
+            end
+            
+            local target = self:GetTargetEnt()
+            if IsValid(target) then
+                target:EmitSound(confighdevice.hdevice_hacking_sound, 80, 100, 1, CHAN_AUTO)
+            end
+        end)
     end
 end
 
@@ -221,8 +225,8 @@ function SWEP:DrawHUD()
 
     -- Barre de hack
     if self:GetIsHacking() then
-        local timeLeft = self:GetHackEndTime() - CurTime()
-        local totalTime = confighdevice.hdevice_hack_time * level
+		local timeLeft = self:GetHackEndTime() - CurTime()
+        local totalTime = self:GetCurrentHackDuration()
         local progress = math.Clamp(1 - (timeLeft / totalTime), 0, 1)
 
         local w, h = 250, 25
