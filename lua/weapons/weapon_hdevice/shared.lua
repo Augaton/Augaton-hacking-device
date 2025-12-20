@@ -124,14 +124,21 @@ local function isButtonExempt(id)
 end
 
 function SWEP:StartHacking(ent, level)
-	local baseTime = confighdevice.hdevice_hack_time * level
+    local baseTime = confighdevice.hdevice_hack_time * level
     local hackTime = baseTime
     
-	if confighdevice.hdevice_rng_enabled then
+    -- Calcul du temps avec RNG si activé
+    if confighdevice.hdevice_rng_enabled then
         local percent = (confighdevice.hdevice_rng_percentage or 20) / 100
         local multiplier = math.Rand(1 - percent, 1 + percent)
         hackTime = baseTime * multiplier
     end
+
+    -- INITIALISATION DES VARIABLES (C'est ce qui manquait)
+    self:SetIsHacking(true)
+    self:SetTargetEnt(ent)
+    self:SetHackEndTime(CurTime() + hackTime) -- Définit la fin du hack
+    self:SetCurrentHackDuration(hackTime)    -- Stocke la durée pour le HUD
 
     if SERVER then
         guthscp.player_message(self:GetOwner(), confighdevice.translation_start)
