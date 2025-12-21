@@ -160,7 +160,10 @@ function SWEP:StartHacking(ent, level)
 end
 
 function SWEP:PrimaryAttack()
-    self:SetNextPrimaryFire(CurTime() + 0.5)
+    if self:GetIsHacking() then return end
+    if CurTime() < self:GetNextPrimaryFire() then return end 
+
+    self:SetNextPrimaryFire(CurTime() + 2)
 
     local owner = self:GetOwner()
     local tr = owner:GetEyeTrace()
